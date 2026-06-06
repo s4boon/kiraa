@@ -1,3 +1,5 @@
+import { toProperCase } from '@/lib/utils'
+import { BookingModelType } from '@shared/types'
 import { useMemo, useState } from 'react'
 
 type CalendarCell = {
@@ -27,7 +29,7 @@ function buildCalendar(year: number, month: number): CalendarCell[] {
   return cells
 }
 
-export default function Calendar() {
+export default function Calendar({ bookings }: { bookings?: BookingModelType[] }) {
   const [current, setCurrent] = useState(() => new Date())
 
   const cells = useMemo(() => {
@@ -36,7 +38,6 @@ export default function Calendar() {
 
   return (
     <div dir="ltr" className="flex h-full w-full flex-col">
-      {/* HEADER */}
       <div className="flex items-center justify-between p-3 border-b">
         <button
           onClick={() => setCurrent((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
@@ -46,10 +47,12 @@ export default function Calendar() {
         </button>
 
         <div className="font-semibold">
-          {current.toLocaleString('fr-FR', {
-            month: 'long',
-            year: 'numeric'
-          })}
+          {toProperCase(
+            current.toLocaleString('fr-FR', {
+              month: 'long',
+              year: 'numeric'
+            })
+          )}
         </div>
 
         <button
@@ -60,7 +63,6 @@ export default function Calendar() {
         </button>
       </div>
 
-      {/* WEEKDAYS */}
       <div className="grid grid-cols-7 border-b text-sm font-medium">
         {WEEKDAYS_FR.map((d) => (
           <div key={d} className="text-center py-2 border-r last:border-r-0">
@@ -69,13 +71,12 @@ export default function Calendar() {
         ))}
       </div>
 
-      {/* GRID */}
-      <div className="grid flex-1 grid-cols-7 grid-rows-6">
+      <div className="grid flex-1 gap-1 grid-cols-7 grid-rows-6">
         {cells.map((cell) => (
           <div
             key={cell.date.toISOString()}
             className={[
-              'border p-2 text-sm relative',
+              'border p-2 text-sm relative rounded-md',
               cell.isCurrentMonth ? 'bg-background' : 'bg-muted/40 text-muted-foreground'
             ].join(' ')}
           >
