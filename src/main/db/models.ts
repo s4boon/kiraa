@@ -52,6 +52,9 @@ export const Booking = sequelize.define('Booking', {
     type: DataTypes.DATE,
     allowNull: false
   },
+  pricing: {
+    type: DataTypes.INTEGER
+  },
   additionalInfo: {
     type: DataTypes.STRING
   },
