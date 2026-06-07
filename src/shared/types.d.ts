@@ -3,7 +3,8 @@ import {
   CreationOptional,
   InferAttributes,
   InferCreationAttributes,
-  Model
+  Model,
+  NonAttribute
 } from 'sequelize'
 
 interface GroupModel extends Model<
@@ -12,13 +13,18 @@ interface GroupModel extends Model<
 > {
   id: CreationOptional<number>
   name: string
+
+  Rooms?: NonAttribute<RoomModel[]>
 }
 
 interface RoomModel extends Model<InferAttributes<RoomModel>, InferCreationAttributes<RoomModel>> {
   id: CreationOptional<number>
   name: string
-  capacity: string
+  capacity: string | null
   groupId: number
+
+  Group?: NonAttribute<GroupModel>
+  Bookings?: NonAttribute<BookingModel[]>
 }
 
 interface TenantModel extends Model<
@@ -27,7 +33,9 @@ interface TenantModel extends Model<
 > {
   id: CreationOptional<string>
   name: string
-  contactInfo: CreationOptional<string>
+  contactInfo: CreationOptional<string | null>
+
+  Bookings?: NonAttribute<BookingModel[]>
 }
 
 interface BookingModel extends Model<
@@ -35,13 +43,19 @@ interface BookingModel extends Model<
   InferCreationAttributes<BookingModel>
 > {
   id: CreationOptional<number>
+
   startDate: Date
   endDate: Date
-  pricing: CreationOptional<number>
+
+  pricing: CreationOptional<number | null>
   status: CreationOptional<'booked' | 'confirmed'>
-  additionalInfo: CreationOptional<string>
+  additionalInfo: CreationOptional<string | null>
+
   roomId: number
   tenantId: string
+
+  Room?: NonAttribute<RoomModel>
+  Tenant?: NonAttribute<TenantModel>
 }
 
 export type GroupModelType = Attributes<GroupModel>

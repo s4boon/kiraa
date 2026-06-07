@@ -1,7 +1,8 @@
-import { ChartColumn, House, Search, Settings, Users } from 'lucide-react'
+import { ChartColumn, House, Search, SettingsIcon, Users } from 'lucide-react'
 import React from 'react'
 import Home from './home'
 import Rooms from './rooms'
+import Settings from './settings'
 
 type Route = {
   path: string
@@ -39,7 +40,7 @@ export const ROUTES: Route[] = [
   {
     path: '/settings',
     label: 'الإعدادات',
-    element: <div>Settings</div>,
-    icon: <Settings />
+    element: <Settings />,
+    icon: <SettingsIcon />
   }
 ]

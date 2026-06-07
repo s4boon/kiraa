@@ -1,11 +1,26 @@
+import { BookingModelType, GroupModelType, RoomModelType, TenantModelType } from '@shared/types'
 export interface APIChannels {
-  'test:test': {
-    input: void
-    output: { success: boolean }
+  'group:create': {
+    input: { name: string }
+    output: { group: GroupModelType }
   }
-  'purchase:creates': {
-    input: { name: string; items: string[] }
-    output: { success: boolean; name: string; items: string[] }
+
+  'group:list': {
+    input: void
+    output: { groups: GroupModelType[] }
+  }
+
+  'room:create': {
+    input: { group_name: string; name: string; capacity?: string }
+    output: { room: RoomModelType }
+  }
+
+  'room:bookings': {
+    input: { roomId: number }
+    output: {
+      room: RoomModelType
+      bookings: { data: BookingModelType; tenant: TenantModelType }[]
+    }
   }
 }
 

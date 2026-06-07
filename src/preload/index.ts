@@ -2,7 +2,12 @@ import { electronAPI } from '@electron-toolkit/preload'
 import { contextBridge, ipcRenderer } from 'electron'
 import { ChannelName, EventChannelName, InvokeFn, OnFn } from 'src/main/ipc/contract'
 
-const ALLOWED_CHANNELS: ChannelName[] = ['test:test', 'purchase:creates']
+const ALLOWED_CHANNELS: ChannelName[] = [
+  'group:create',
+  'room:bookings',
+  'room:create',
+  'group:list'
+]
 const ALLOWED_EVENTS: EventChannelName[] = ['notification:new']
 
 const invoke: InvokeFn = (channel, data?) => {

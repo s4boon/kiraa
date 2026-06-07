@@ -10,6 +10,7 @@ export const Group = sequelize.define<GroupModel>('Group', {
   },
   name: {
     type: DataTypes.STRING,
+    unique: true,
     allowNull: false
   }
 })
