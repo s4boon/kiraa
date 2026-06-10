@@ -18,6 +18,7 @@ type CreatableSelectProps = React.HTMLAttributes<HTMLDivElement> & {
   placeholder?: string
   inputPlaceholder?: string
   createLabel?: string
+  disabled?: boolean
 }
 
 export const CreatableSelect = React.forwardRef<CreatableSelectHandle, CreatableSelectProps>(
@@ -28,6 +29,7 @@ export const CreatableSelect = React.forwardRef<CreatableSelectHandle, Creatable
       placeholder = 'Select...',
       inputPlaceholder = 'Search...',
       createLabel = 'Create',
+      disabled,
       ...props
     },
     ref
@@ -71,6 +73,7 @@ export const CreatableSelect = React.forwardRef<CreatableSelectHandle, Creatable
       <div data-slot="creatable-select" className={cn('relative w-full', className)} {...props}>
         {/* Trigger */}
         <button
+          disabled={disabled}
           type="button"
           onClick={() => setOpen((v) => !v)}
           className={cn(

@@ -4,11 +4,13 @@ import { ChannelName, EventChannelName, InvokeFn, OnFn } from 'src/main/ipc/cont
 
 const ALLOWED_CHANNELS: ChannelName[] = [
   'group:create',
+  'group:list',
+  'group:delete',
   'room:bookings',
   'room:create',
-  'group:list'
+  'window:newchild'
 ]
-const ALLOWED_EVENTS: EventChannelName[] = ['notification:new']
+const ALLOWED_EVENTS: EventChannelName[] = ['notification:new', 'cache:invalidate']
 
 const invoke: InvokeFn = (channel, data?) => {
   if (!ALLOWED_CHANNELS.includes(channel)) {

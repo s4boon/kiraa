@@ -1,3 +1,4 @@
+import type { QueryKeyName } from '@shared/query_keys'
 import { BookingModelType, GroupModelType, RoomModelType, TenantModelType } from '@shared/types'
 export interface APIChannels {
   'group:create': {
@@ -7,7 +8,17 @@ export interface APIChannels {
 
   'group:list': {
     input: void
-    output: { groups: GroupModelType[] }
+    output: {
+      groups: {
+        data: GroupModelType
+        rooms: GroupModelType[]
+      }[]
+    }
+  }
+
+  'group:delete': {
+    input: { name: string }
+    output: { affected: number }
   }
 
   'room:create': {
@@ -22,6 +33,10 @@ export interface APIChannels {
       bookings: { data: BookingModelType; tenant: TenantModelType }[]
     }
   }
+  'window:newchild': {
+    input: { route: string }
+    output: void
+  }
 }
 
 export interface EventChannels {
@@ -29,6 +44,9 @@ export interface EventChannels {
     title: string
     message: string
     type: string
+  }
+  'cache:invalidate': {
+    model: QueryKeyName
   }
 }
 

@@ -1,26 +1,20 @@
 import './assets/main.css'
 
+import { QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { HashRouter, Route, Routes } from 'react-router'
+import App from './app'
 import { CalendarProvider } from './components/context/calendar_context'
 import { Toaster } from './components/ui/sonner'
-import Layout from './layout'
-import { ROUTES } from './routes/ROUTES'
+import { queryClient } from './lib/ts_query'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Toaster dir="rtl" />
-    <CalendarProvider>
-      <HashRouter>
-        <Routes>
-          <Route element={<Layout />}>
-            {ROUTES.map((route) => {
-              return <Route key={route.path} path={route.path} element={route.element} />
-            })}
-          </Route>
-        </Routes>
-      </HashRouter>
-    </CalendarProvider>
+    <QueryClientProvider client={queryClient}>
+      <Toaster dir="rtl" />
+      <CalendarProvider>
+        <App />
+      </CalendarProvider>
+    </QueryClientProvider>
   </StrictMode>
 )

@@ -2,8 +2,10 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import icon from '../../resources/icon.png?asset'
+import './db/hooks'
+import { hookEvents, registerHooks } from './db/hooks'
 import { sequelize } from './db/sequelize'
-import { registerHandlers } from './ipc/handlers'
+import { notifyAllWindows, registerHandlers } from './ipc/handlers'
 
 function createWindow(): void {
   // Create the browser window.
@@ -11,9 +13,10 @@ function createWindow(): void {
     width: 900,
     height: 670,
     show: false,
-    autoHideMenuBar: !is.dev,
+    autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
+      devTools: is.dev,
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
@@ -44,8 +47,11 @@ app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
   sequelize.sync()
+  registerHooks()
   registerHandlers()
-
+  hookEvents.on('invalidate', (payload) => {
+    notifyAllWindows('cache:invalidate', payload)
+  })
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils

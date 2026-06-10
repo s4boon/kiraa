@@ -1,4 +1,6 @@
+import { is } from '@electron-toolkit/utils'
 import { BrowserWindow, ipcMain, IpcMainInvokeEvent } from 'electron'
+import path from 'path'
 import { Booking, Group, Room, Tenant } from '../db/models'
 import type { APIChannels, ChannelName, EventChannelName, EventChannels } from './contract'
 
@@ -20,41 +22,88 @@ const handlers: {
 } = {
   'group:create': async (_, data) => {
     const group = await Group.create({ name: data.name })
-    return { group: group.dataValues }
+
+    return {
+      group: group.get({ plain: true })
+    }
   },
 
   'group:list': async () => {
-    const groups = await Group.findAll()
-    return { groups: groups.map((g) => g.dataValues) }
+    const groups = await Group.findAll({
+      include: [Room]
+    })
+
+    return {
+      groups: groups.map((g) => ({
+        data: g.get({ plain: true }),
+        rooms: (g.Rooms ?? []).map((r) => r.get({ plain: true }))
+      }))
+    }
+  },
+
+  'group:delete': async (_, data) => {
+    const rows = await Group.destroy({
+      where: {
+        name: data.name
+      }
+    })
+    return { affected: rows }
   },
 
   'room:create': async (_, data) => {
-    const group = await Group.findOrCreate({ where: { name: data.group_name } }).then(
-      (res) => res[0]
-    )
+    const [group] = await Group.findOrCreate({
+      where: { name: data.group_name }
+    })
+
     const room = await Room.create({
-      groupId: group.dataValues.id,
+      groupId: group.id,
       name: data.name,
       capacity: data.capacity
     })
-    return { room: room.dataValues }
+
+    return {
+      room: room.get({ plain: true })
+    }
   },
 
   'room:bookings': async (_, data) => {
     const room = await Room.findByPk(data.roomId)
+
     if (!room) {
-      throw new Error("couldn't find room #" + data.roomId)
+      throw new Error(`couldn't find room #${data.roomId}`)
     }
+
     const bookings = await Booking.findAll({
-      where: {
-        roomId: data.roomId
-      },
+      where: { roomId: data.roomId },
       include: [Tenant]
     })
+
     return {
-      room: room.dataValues,
-      bookings: bookings.map((b) => {
-        return { data: b.dataValues, tenant: b.Tenant!.dataValues }
+      room: room.get({ plain: true }),
+
+      bookings: bookings.map((b) => ({
+        data: b.get({ plain: true }),
+        tenant: b.Tenant!.get({ plain: true })
+      }))
+    }
+  },
+  'window:newchild': (_, data) => {
+    const child = new BrowserWindow({
+      width: 800,
+      height: 600,
+      parent: BrowserWindow.getFocusedWindow() ?? undefined,
+      modal: true,
+      webPreferences: {
+        preload: path.join(__dirname, '../preload/index.js'),
+        sandbox: false
+      }
+    })
+
+    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+      child.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#${data.route}`)
+    } else {
+      child.loadFile(path.join(__dirname, '../renderer/index.html'), {
+        hash: data.route
       })
     }
   }

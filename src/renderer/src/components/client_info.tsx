@@ -11,9 +11,10 @@ type Props = {
 export default function Info({ data }: Props) {
   const { selectedDate, calendarState, startSelection, endSelection } = useCalendar()
   const item = data?.find((d) => {
-    if (selectedDate) {
-      return isInRange(selectedDate, d.booking.startDate, d.booking.endDate)
+    if (!selectedDate) {
+      return false
     }
+    return isInRange(selectedDate, d.booking.startDate, d.booking.endDate)
   })
   const tenant = item?.tenant
   switch (calendarState.mode) {
@@ -43,7 +44,7 @@ type InputProps = {
     end: Date
   }
 }
-function Input({ tenant, period }: InputProps) {
+function Input({ tenant }: InputProps) {
   return (
     <form>
       <input type="text" name="" id="" defaultValue={tenant?.name} />

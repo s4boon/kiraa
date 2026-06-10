@@ -3,7 +3,7 @@ import Navbar from './components/navbar'
 
 type Props = {}
 
-export default function Layout() {
+export default function Layout({}: Props) {
   return (
     <main dir="rtl" className="flex h-dvh w-screen flex-col">
       <Navbar />

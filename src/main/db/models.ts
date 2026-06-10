@@ -84,8 +84,8 @@ export const Booking = sequelize.define<BookingModel>('Booking', {
 })
 
 Group.hasMany(Room, { foreignKey: 'groupId' })
-Room.belongsTo(Group, { foreignKey: 'groupId' })
+Room.belongsTo(Group, { foreignKey: 'groupId', onDelete: 'CASCADE' })
 Room.hasMany(Booking, { foreignKey: 'roomId' })
-Booking.belongsTo(Room, { foreignKey: 'roomId' })
+Booking.belongsTo(Room, { foreignKey: 'roomId', onDelete: 'CASCADE' })
 Tenant.hasMany(Booking, { foreignKey: 'tenantId' })
-Booking.belongsTo(Tenant, { foreignKey: 'tenantId' })
+Booking.belongsTo(Tenant, { foreignKey: 'tenantId', onDelete: 'CASCADE' })
