@@ -1,5 +1,12 @@
 import type { QueryKeyName } from '@shared/query_keys'
-import { BookingModelType, GroupModelType, RoomModelType, TenantModelType } from '@shared/types'
+import {
+  BookingModelType,
+  GroupModelType,
+  RoomModelType,
+  TenantModel,
+  TenantModelType
+} from '@shared/types'
+import { CreationAttributes } from 'sequelize'
 export interface APIChannels {
   'group:create': {
     input: { name: string }
@@ -11,9 +18,14 @@ export interface APIChannels {
     output: {
       groups: {
         data: GroupModelType
-        rooms: GroupModelType[]
+        rooms: RoomModelType[]
       }[]
     }
+  }
+
+  'group:update': {
+    input: { target: string; new_name: string }
+    output: { affected: number }
   }
 
   'group:delete': {
@@ -27,11 +39,23 @@ export interface APIChannels {
   }
 
   'room:bookings': {
-    input: { roomId: number }
+    input: { name: string }
     output: {
       room: RoomModelType
       bookings: { data: BookingModelType; tenant: TenantModelType }[]
     }
+  }
+  'booking:create': {
+    input: {
+      checkin: Date
+      checkout: Date
+      total: number
+      paid: number
+      room_name: string
+      tenant: CreationAttributes<TenantModel>
+      additional?: string
+    }
+    output: { booking: BookingModelType }
   }
   'window:newchild': {
     input: { route: string }
@@ -46,7 +70,7 @@ export interface EventChannels {
     type: string
   }
   'cache:invalidate': {
-    model: QueryKeyName
+    key: QueryKeyName
   }
 }
 

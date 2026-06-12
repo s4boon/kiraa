@@ -1,7 +1,41 @@
+import { ChartColumn, House, Search, Users } from 'lucide-react'
 import { Link } from 'react-router'
-import { ROUTES } from './ROUTES'
 
 type Props = {}
+
+type Route = {
+  path: string
+  label: string
+  icon: React.ReactNode
+}
+
+export const ROUTES: Route[] = [
+  {
+    path: '/',
+    label: 'القائمة الرئيسية',
+    icon: <House />
+  },
+  {
+    path: '/rooms/',
+    label: 'قائمة الغرف',
+    icon: <House />
+  },
+  {
+    path: '/search',
+    label: 'بحث سريع',
+    icon: <Search />
+  },
+  {
+    path: '/customers',
+    label: 'قائمة الزبائن',
+    icon: <Users />
+  },
+  {
+    path: '/stats',
+    label: 'الإحصائيات',
+    icon: <ChartColumn />
+  }
+]
 
 export default function App({}: Props) {
   return (

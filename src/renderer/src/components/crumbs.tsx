@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router'
-import { ROUTES } from '../routes/ROUTES'
+import { ROUTES } from '../routes/home'
 type Props = {}
 
 export default function crumbs({}: Props) {

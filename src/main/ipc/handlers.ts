@@ -2,6 +2,7 @@ import { is } from '@electron-toolkit/utils'
 import { BrowserWindow, ipcMain, IpcMainInvokeEvent } from 'electron'
 import path from 'path'
 import { Booking, Group, Room, Tenant } from '../db/models'
+import { sequelize } from '../db/sequelize'
 import type { APIChannels, ChannelName, EventChannelName, EventChannels } from './contract'
 
 type Handler<K extends ChannelName> = (
@@ -30,15 +31,28 @@ const handlers: {
 
   'group:list': async () => {
     const groups = await Group.findAll({
-      include: [Room]
+      include: {
+        model: Room,
+        separate: true,
+        order: [['id', 'ASC']]
+      }
     })
-
     return {
       groups: groups.map((g) => ({
         data: g.get({ plain: true }),
         rooms: (g.Rooms ?? []).map((r) => r.get({ plain: true }))
       }))
     }
+  },
+
+  'group:update': async (_, data) => {
+    const [affected] = await Group.update(
+      {
+        name: data.new_name
+      },
+      { where: { name: data.target } }
+    )
+    return { affected }
   },
 
   'group:delete': async (_, data) => {
@@ -67,26 +81,53 @@ const handlers: {
   },
 
   'room:bookings': async (_, data) => {
-    const room = await Room.findByPk(data.roomId)
+    const room = await Room.findOne({
+      where: {
+        name: data.name
+      },
+      include: {
+        model: Booking,
+        include: [Tenant]
+      }
+    })
 
     if (!room) {
-      throw new Error(`couldn't find room #${data.roomId}`)
+      throw new Error(`couldn't find room "${data.name}"`)
     }
-
-    const bookings = await Booking.findAll({
-      where: { roomId: data.roomId },
-      include: [Tenant]
-    })
 
     return {
       room: room.get({ plain: true }),
-
-      bookings: bookings.map((b) => ({
+      bookings: (room.Bookings ?? []).map((b) => ({
         data: b.get({ plain: true }),
         tenant: b.Tenant!.get({ plain: true })
       }))
     }
   },
+
+  'booking:create': async (_, data) => {
+    const { checkin, checkout, paid, tenant, total, room_name, additional } = data
+    const res = await sequelize.transaction(async (t) => {
+      const room = await Room.findOne({ where: { name: room_name } })
+      if (!room) throw new Error('room does not exist!')
+      const [tenant_] = await Tenant.findOrCreate({ where: { ...tenant }, transaction: t })
+      const booking = await Booking.create(
+        {
+          startDate: checkin,
+          endDate: checkout,
+          additionalInfo: additional ?? '',
+          status: 'booked',
+          total: total,
+          paid: paid,
+          roomId: room.get({ plain: true }).id,
+          tenantId: tenant_.get({ plain: true }).id
+        },
+        { transaction: t }
+      )
+      return booking
+    })
+    return { booking: res.get({ plain: true }) }
+  },
+
   'window:newchild': (_, data) => {
     const child = new BrowserWindow({
       width: 800,

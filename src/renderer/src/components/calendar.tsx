@@ -1,8 +1,18 @@
 import { cn, toProperCase } from '@/lib/utils'
-import { BookingModelType } from '@shared/types'
+import { BookingModelType, RoomModelType, TenantModelType } from '@shared/types'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Edit, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { isInRange, toHalfDate, useCalendar } from './context/calendar_context'
+import { useEffect, useMemo, useState } from 'react'
+import { isInRange, isSameDay, isToday, toHalfDate, useCalendar } from './context/calendar_context'
+
+type BookingWithTenant = {
+  data: BookingModelType
+  tenant: TenantModelType
+}
+
+type CalendarProps = {
+  room: RoomModelType
+  bookings: BookingWithTenant[]
+}
 
 type CalendarCell = {
   date: Date
@@ -25,26 +35,14 @@ function buildCalendar(year: number, month: number): CalendarCell[] {
   return cells
 }
 
-function dayTimestamp(date: Date): number {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
-}
-
-function isSameDay(a: Date, b: Date): boolean {
-  return dayTimestamp(a) === dayTimestamp(b)
-}
-
-function isToday(date: Date): boolean {
-  return isSameDay(date, new Date())
-}
-
-const COLORS = ['bg-green-300', 'bg-blue-300', 'bg-yellow-300', 'bg-purple-300']
-function color(id: number) {
-  return COLORS[id % COLORS.length]
+function assignColor(id: number) {
+  const hue = (id * 137.508) % 360
+  return `hsl(${hue}, 70%, 60%)`
 }
 
 const SELECTION_COLOR = 'text-black bg-teal-300'
 
-export default function Calendar({ bookings }: { bookings?: BookingModelType[] }) {
+export default function Calendar({ room, bookings }: CalendarProps) {
   const {
     calendarState,
     selectedDate,
@@ -56,12 +54,17 @@ export default function Calendar({ bookings }: { bookings?: BookingModelType[] }
     enterSelect,
     selectHalf,
     hoverHalf,
-    clearHover
+    clearHover,
+    clearSelection
   } = useCalendar()
+
+  useEffect(() => {
+    clearSelection()
+  }, [room])
 
   const [current, setCurrent] = useState(() => new Date())
 
-  const bookings_ = bookings?.map((b) => ({ ...b, color: color(b.id) }))
+  const bookings_ = bookings.map((b) => ({ ...b, color: assignColor(b.data.id) }))
 
   const cells = useMemo(() => buildCalendar(current.getFullYear(), current.getMonth()), [current])
 
@@ -80,12 +83,13 @@ export default function Calendar({ bookings }: { bookings?: BookingModelType[] }
     return [undefined, undefined]
   }, [calendarState, hoveredHalf, startSelection, endSelection])
 
-  function handleHalfClick(date: Date, half: 'AM' | 'PM') {
+  function handleHalfClick(date: Date, half: 'AM' | 'PM', booked: boolean) {
     if (calendarState.mode === 'display') {
       setSelectedDate(date)
       return
     }
     if (calendarState.mode === 'select') {
+      if (booked) return
       selectHalf(date, half)
     }
   }
@@ -158,13 +162,15 @@ export default function Calendar({ bookings }: { bookings?: BookingModelType[] }
           const amDate = toHalfDate(cell.date, 'AM')
           const pmDate = toHalfDate(cell.date, 'PM')
 
-          const amBooking = bookings_?.find(
+          const amBooking = bookings_.find(
             (b) =>
-              b.startDate.getTime() <= amDate.getTime() && amDate.getTime() <= b.endDate.getTime()
+              b.data.startDate.getTime() <= amDate.getTime() &&
+              amDate.getTime() <= b.data.endDate.getTime()
           )
-          const pmBooking = bookings_?.find(
+          const pmBooking = bookings_.find(
             (b) =>
-              b.startDate.getTime() <= pmDate.getTime() && pmDate.getTime() <= b.endDate.getTime()
+              b.data.startDate.getTime() <= pmDate.getTime() &&
+              pmDate.getTime() <= b.data.endDate.getTime()
           )
 
           const amInRange = rangeFrom && rangeTo && isInRange(amDate, rangeFrom, rangeTo)
@@ -188,34 +194,46 @@ export default function Calendar({ bookings }: { bookings?: BookingModelType[] }
                 selectedDate && isSameDay(cell.date, selectedDate) && 'border-chart-4'
               )}
             >
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-medium pointer-events-none z-10 select-none">
+              <span className="absolute top-2 left-2 flex items-center justify-center text-lg font-medium pointer-events-none z-10 select-none">
                 {cell.date.getDate()}
               </span>
 
               <div className="flex h-full">
                 {/* AM — left half */}
                 <div
-                  onClick={() => !disabled && !amBooking && handleHalfClick(cell.date, 'AM')}
+                  onClick={() =>
+                    !disabled && handleHalfClick(cell.date, 'AM', amBooking != undefined)
+                  }
                   onMouseEnter={() => !disabled && !amBooking && hoverHalf(cell.date, 'AM')}
+                  style={
+                    amBooking && {
+                      background: amBooking.color
+                    }
+                  }
                   className={cn(
                     'flex-1 h-full',
-                    disabled || amBooking
-                      ? 'cursor-default'
-                      : 'cursor-pointer hover:brightness-110',
-                    amBooking ? amBooking.color : amInRange ? SELECTION_COLOR : '',
+                    disabled ? 'cursor-default' : 'cursor-pointer',
+                    calendarState.mode == 'select' && 'hover:brightness-110',
+                    amBooking ? amBooking.color : amInRange && SELECTION_COLOR,
                     isAnchorAM && 'ring-2 ring-inset ring-teal-500'
                   )}
                 />
                 {/* PM — right half */}
                 <div
-                  onClick={() => !disabled && !pmBooking && handleHalfClick(cell.date, 'PM')}
+                  onClick={() =>
+                    !disabled && handleHalfClick(cell.date, 'PM', pmBooking != undefined)
+                  }
                   onMouseEnter={() => !disabled && !pmBooking && hoverHalf(cell.date, 'PM')}
+                  style={
+                    pmBooking && {
+                      background: pmBooking.color
+                    }
+                  }
                   className={cn(
                     'flex-1 h-full',
-                    disabled || pmBooking
-                      ? 'cursor-default'
-                      : 'cursor-pointer hover:brightness-110',
-                    pmBooking ? pmBooking.color : pmInRange ? SELECTION_COLOR : '',
+                    disabled ? 'cursor-default' : 'cursor-pointer',
+                    calendarState.mode == 'select' && 'hover:brightness-110',
+                    pmBooking ? pmBooking.color : pmInRange && SELECTION_COLOR,
                     isAnchorPM && 'ring-2 ring-inset ring-teal-500'
                   )}
                 />

@@ -8,6 +8,7 @@ const ALLOWED_CHANNELS: ChannelName[] = [
   'group:delete',
   'room:bookings',
   'room:create',
+  'booking:create',
   'window:newchild'
 ]
 const ALLOWED_EVENTS: EventChannelName[] = ['notification:new', 'cache:invalidate']

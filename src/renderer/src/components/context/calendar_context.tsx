@@ -25,6 +25,28 @@ export function isInRange(date: Date, from: Date, to: Date): boolean {
   return from.getTime() <= date.getTime() && date.getTime() <= to.getTime()
 }
 
+export function daysInRange(from: Date, to: Date): number {
+  const ms = dayTimestamp(to) - dayTimestamp(from)
+  return Math.round(ms / (1000 * 60 * 60 * 24)) + 1
+}
+
+function dayTimestamp(date: Date): number {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+}
+
+export function isSameDay(a: Date, b: Date): boolean {
+  return dayTimestamp(a) === dayTimestamp(b)
+}
+
+export function isDayInRange(date: Date, from: Date, to: Date): boolean {
+  const d = dayTimestamp(date)
+  return dayTimestamp(from) <= d && d <= dayTimestamp(to)
+}
+
+export function isToday(date: Date): boolean {
+  return isSameDay(date, new Date())
+}
+
 // --- Context ---
 
 type CalendarContextType = {
@@ -40,6 +62,7 @@ type CalendarContextType = {
   selectHalf: (date: Date, half: 'AM' | 'PM') => void
   hoverHalf: (date: Date, half: 'AM' | 'PM') => void
   clearHover: () => void
+  clearSelection: () => void
   setSelectedDate: React.Dispatch<React.SetStateAction<Date | undefined>>
 }
 
@@ -95,6 +118,11 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
     setHoveredHalf(undefined)
   }
 
+  function clearSelection() {
+    setStartSelection(undefined)
+    setEndSelection(undefined)
+  }
+
   return (
     <CalendarContext.Provider
       value={{
@@ -108,7 +136,8 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
         selectHalf,
         hoverHalf,
         clearHover,
-        setSelectedDate
+        setSelectedDate,
+        clearSelection
       }}
     >
       {children}

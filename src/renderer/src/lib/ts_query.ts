@@ -10,13 +10,13 @@ export const queryClient = new QueryClient({
 })
 
 export function setupCacheInvalidation() {
-  return window.ipcAPI.on('cache:invalidate', ({ model }: { model: QueryKeyName }) => {
-    const key = queryKeys[model]
+  return window.ipcAPI.on('cache:invalidate', ({ key }: { key: QueryKeyName }) => {
+    const k = queryKeys[key]
 
-    if (!key) return
+    if (!k) return
 
     queryClient.invalidateQueries({
-      queryKey: key
+      queryKey: k
     })
   })
 }

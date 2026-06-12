@@ -47,7 +47,8 @@ interface BookingModel extends Model<
   startDate: Date
   endDate: Date
 
-  pricing: CreationOptional<number | null>
+  total: CreationOptional<number | null>
+  paid: CreationOptional<number | null>
   status: CreationOptional<'booked' | 'confirmed'>
   additionalInfo: CreationOptional<string | null>
 

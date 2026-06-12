@@ -2,8 +2,10 @@ import { useEffect } from 'react'
 import { HashRouter, Route, Routes } from 'react-router'
 import Layout from './layout'
 import { setupCacheInvalidation } from './lib/ts_query'
+import HomePage from './routes/home'
 import Manage from './routes/manage'
-import { ROUTES } from './routes/ROUTES'
+import RoomsPage from './routes/rooms'
+import RoomsRedirect from './routes/rooms_redirect'
 
 export default function App() {
   useEffect(() => {
@@ -15,9 +17,9 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route element={<Layout />}>
-          {ROUTES.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
-          ))}
+          <Route path={'/'} element={<HomePage />} />
+          <Route path="/rooms" element={<RoomsRedirect />} />
+          <Route path="/rooms/:name" element={<RoomsPage />} />
         </Route>
 
         <Route path="/manage" element={<Manage />} />

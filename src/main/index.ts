@@ -1,9 +1,10 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
+import { InvalidationMap } from '@shared/query_keys'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 import './db/hooks'
-import { hookEvents, registerHooks } from './db/hooks'
+import { on, registerHooks } from './db/hooks'
 import { sequelize } from './db/sequelize'
 import { notifyAllWindows, registerHandlers } from './ipc/handlers'
 
@@ -49,8 +50,10 @@ app.whenReady().then(() => {
   sequelize.sync()
   registerHooks()
   registerHandlers()
-  hookEvents.on('invalidate', (payload) => {
-    notifyAllWindows('cache:invalidate', payload)
+  on('invalidate', (payload) => {
+    for (const key of InvalidationMap[payload.key]) {
+      notifyAllWindows('cache:invalidate', { key })
+    }
   })
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

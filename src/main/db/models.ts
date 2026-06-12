@@ -63,7 +63,10 @@ export const Booking = sequelize.define<BookingModel>('Booking', {
     type: DataTypes.DATE,
     allowNull: false
   },
-  pricing: {
+  total: {
+    type: DataTypes.INTEGER
+  },
+  paid: {
     type: DataTypes.INTEGER
   },
   status: {
