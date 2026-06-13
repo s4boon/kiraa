@@ -12,7 +12,7 @@ export default function rooms({ groups }: { groups: Group[] }) {
   return groups.map((group) => {
     return (
       <Collapsible key={group.data.id}>
-        <CollapsibleTrigger className="bg-accent px-2 py-1 rounded-xs w-full text-start">
+        <CollapsibleTrigger className="bg-accent px-2 py-1 rounded-xs w-full text-start cursor-pointer hover:brightness-110">
           {group.data.name}
         </CollapsibleTrigger>
         <CollapsibleContent className="grid">

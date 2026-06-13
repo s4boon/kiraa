@@ -1,11 +1,13 @@
+import { BookingModelType } from '@shared/types'
 import { createContext, ReactNode, useContext, useState } from 'react'
 
 // --- State machine types ---
 
 type DisplayState = { mode: 'display' }
 type SelectState = { mode: 'select'; firstSelection?: Date }
+type EditState = { mode: 'edit'; booking: BookingModelType; adjusting?: 'start' | 'end' }
 
-export type CalendarState = DisplayState | SelectState
+export type CalendarState = DisplayState | SelectState | EditState
 
 // --- Half-day helpers ---
 
@@ -25,12 +27,7 @@ export function isInRange(date: Date, from: Date, to: Date): boolean {
   return from.getTime() <= date.getTime() && date.getTime() <= to.getTime()
 }
 
-export function daysInRange(from: Date, to: Date): number {
-  const ms = dayTimestamp(to) - dayTimestamp(from)
-  return Math.round(ms / (1000 * 60 * 60 * 24)) + 1
-}
-
-function dayTimestamp(date: Date): number {
+export function dayTimestamp(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 }
 
@@ -59,11 +56,14 @@ type CalendarContextType = {
   // transitions
   enterDisplay: () => void
   enterSelect: () => void
+  enterEdit: (booking: BookingModelType) => void
   selectHalf: (date: Date, half: 'AM' | 'PM') => void
   hoverHalf: (date: Date, half: 'AM' | 'PM') => void
+  grabBoundary: (which: 'start' | 'end') => void
+  commitBoundary: (date: Date, half: 'AM' | 'PM') => void
   clearHover: () => void
-  clearSelection: () => void
   setSelectedDate: React.Dispatch<React.SetStateAction<Date | undefined>>
+  clearSelection: () => void
 }
 
 const CalendarContext = createContext<CalendarContextType | undefined>(undefined)
@@ -89,6 +89,15 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
     setHoveredHalf(undefined)
   }
 
+  function enterEdit(booking: BookingModelType) {
+    setCalendarState({ mode: 'edit', booking })
+    setStartSelection(undefined)
+    setEndSelection(undefined)
+    setHoveredHalf(undefined)
+  }
+
+  // --- select mode ---
+
   function selectHalf(date: Date, half: 'AM' | 'PM') {
     if (calendarState.mode !== 'select') return
     const clicked = toHalfDate(date, half)
@@ -98,12 +107,23 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    const [start, end] = halfBefore(calendarState.firstSelection, clicked)
-      ? [calendarState.firstSelection, clicked]
-      : [clicked, calendarState.firstSelection]
+    // Enforce minimum 1 full day (start must be AM, end must be PM, on different days
+    // or same day only if start=AM and end=PM)
+    const first = calendarState.firstSelection
+    const [tentativeStart, tentativeEnd] = halfBefore(first, clicked)
+      ? [first, clicked]
+      : [clicked, first]
 
-    setStartSelection(start)
-    setEndSelection(end)
+    // Minimum: start day AM to end day PM — reject if same half on same day
+    if (
+      isSameDay(tentativeStart, tentativeEnd) &&
+      getHalf(tentativeStart) === getHalf(tentativeEnd)
+    ) {
+      return
+    }
+
+    setStartSelection(tentativeStart)
+    setEndSelection(tentativeEnd)
     setCalendarState({ mode: 'select' })
     setHoveredHalf(undefined)
   }
@@ -112,6 +132,32 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
     if (calendarState.mode === 'select' && calendarState.firstSelection) {
       setHoveredHalf(toHalfDate(date, half))
     }
+    if (calendarState.mode === 'edit' && calendarState.adjusting) {
+      setHoveredHalf(toHalfDate(date, half))
+    }
+  }
+
+  // --- edit mode ---
+
+  function grabBoundary(which: 'start' | 'end') {
+    if (calendarState.mode !== 'edit') return
+    setCalendarState({ ...calendarState, adjusting: which })
+    setHoveredHalf(undefined)
+  }
+
+  function commitBoundary(date: Date, half: 'AM' | 'PM') {
+    if (calendarState.mode !== 'edit' || !calendarState.adjusting) return
+    const { booking, adjusting } = calendarState
+    const clicked = toHalfDate(date, half)
+
+    const newBooking: BookingModelType = {
+      ...booking,
+      startDate: adjusting === 'start' ? clicked : booking.startDate,
+      endDate: adjusting === 'end' ? clicked : booking.endDate
+    }
+
+    setCalendarState({ mode: 'edit', booking: newBooking })
+    setHoveredHalf(undefined)
   }
 
   function clearHover() {
@@ -121,6 +167,8 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
   function clearSelection() {
     setStartSelection(undefined)
     setEndSelection(undefined)
+    setHoveredHalf(undefined)
+    setCalendarState({ mode: 'display' })
   }
 
   return (
@@ -133,8 +181,11 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
         hoveredHalf,
         enterDisplay,
         enterSelect,
+        enterEdit,
         selectHalf,
         hoverHalf,
+        grabBoundary,
+        commitBoundary,
         clearHover,
         setSelectedDate,
         clearSelection

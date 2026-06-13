@@ -63,7 +63,7 @@ export default function booking_form({ room }: Props) {
       }}
     >
       <Input type="text" name="tenant_name" placeholder="إسم الزبون" required />
-      <Input type="text" name="tenant_contact" placeholder="إسم الزبون" />
+      <Input type="text" name="tenant_contact" placeholder="معلومات الإتصال" />
       {startSelection && (
         <div>
           من: {formatter.format(startSelection)}{' '}

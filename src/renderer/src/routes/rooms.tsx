@@ -36,6 +36,7 @@ export default function RoomsPage({}: Props) {
   return (
     <div className="grid h-full gap-3 grid-cols-16">
       <div className="col-span-3 overflow-y-auto">
+        <h2 className="mb-1">قائمة الغرف</h2>
         <Rooms groups={groups} />
       </div>
 
