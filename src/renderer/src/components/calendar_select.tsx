@@ -55,9 +55,9 @@ export function CalendarSelect({ cells, bookings }: CalendarSelectProps) {
     const isAnchor = firstSelection && firstSelection.getTime() === halfDate.getTime()
 
     return {
-      style: booking ? { backgroundColor: booking.color } : undefined,
+      style: booking ? { backgroundColor: booking.color, opacity: 0.4 } : undefined,
       className: booking
-        ? ''
+        ? 'cursor-default'
         : inRange
           ? 'bg-teal-300 text-black hover:brightness-110'
           : 'hover:brightness-110',

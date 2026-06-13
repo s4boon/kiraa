@@ -1,5 +1,6 @@
-import BookingForm from '@/components/booking_form'
-import Bookings from '@/components/bookings'
+import BookingAdd from '@/components/booking_add_form'
+import Bookings from '@/components/booking_display'
+import BookingEdit from '@/components/booking_edit_form'
 import Calendar from '@/components/calendar'
 import { isDayInRange, useCalendar } from '@/components/context/calendar_context'
 import Rooms from '@/components/rooms'
@@ -36,7 +37,9 @@ export default function RoomsPage({}: Props) {
   return (
     <div className="grid h-full gap-3 grid-cols-16">
       <div className="col-span-3 overflow-y-auto">
-        <h2 className="mb-1">قائمة الغرف</h2>
+        <div className="bg-accent text-center text-foreground py-1 mb-1.5 rounded-sm">
+          قائمة الغرف
+        </div>
         <Rooms groups={groups} />
       </div>
 
@@ -47,12 +50,15 @@ export default function RoomsPage({}: Props) {
       <div className="col-span-4">
         {calendarState.mode == 'display' ? (
           <Bookings
+            room={roomName}
             bookings={bookings.filter(
               (b) => selectedDate && isDayInRange(selectedDate, b.data.startDate, b.data.endDate)
             )}
           />
+        ) : calendarState.mode == 'select' ? (
+          <BookingAdd room={roomName} />
         ) : (
-          <BookingForm room={roomName} />
+          <BookingEdit room={roomName} />
         )}
       </div>
     </div>

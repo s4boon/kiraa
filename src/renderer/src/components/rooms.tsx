@@ -12,7 +12,7 @@ export default function rooms({ groups }: { groups: Group[] }) {
   return groups.map((group) => {
     return (
       <Collapsible key={group.data.id}>
-        <CollapsibleTrigger className="bg-accent px-2 py-1 rounded-xs w-full text-start cursor-pointer hover:brightness-110">
+        <CollapsibleTrigger className="px-2 py-1 w-full text-start cursor-pointer hover:brightness-110 rounded-sm border my-1 bg-accent/50">
           {group.data.name}
         </CollapsibleTrigger>
         <CollapsibleContent className="grid">
@@ -22,8 +22,8 @@ export default function rooms({ groups }: { groups: Group[] }) {
                 key={room.id}
                 className={({ isActive }) =>
                   cn(
-                    isActive ? 'bg-chart-4 text-background px-3 font-semibold' : 'px-1',
-                    'py-0.5 rounded-xs '
+                    isActive ? 'bg-chart-4 text-background px-3 font-semibold' : 'px-1 bg-muted/20',
+                    'py-1 rounded-none border-b'
                   )
                 }
                 to={'/rooms/' + room.name}

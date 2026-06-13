@@ -105,16 +105,18 @@ const handlers: {
   },
 
   'booking:create': async (_, data) => {
-    const { checkin, checkout, paid, tenant, total, room_name, additional } = data
+    const { booking, tenant, room_name } = data
+    const { endDate, startDate, additionalInfo, paid, total } = booking
+
     const res = await sequelize.transaction(async (t) => {
       const room = await Room.findOne({ where: { name: room_name } })
-      if (!room) throw new Error('room does not exist!')
+      if (!room) throw new Error('could not find room')
       const [tenant_] = await Tenant.findOrCreate({ where: { ...tenant }, transaction: t })
       const booking = await Booking.create(
         {
-          startDate: checkin,
-          endDate: checkout,
-          additionalInfo: additional ?? '',
+          startDate,
+          endDate,
+          additionalInfo,
           status: 'booked',
           total: total,
           paid: paid,
@@ -126,6 +128,25 @@ const handlers: {
       return booking
     })
     return { booking: res.get({ plain: true }) }
+  },
+
+  'booking:update': async (_, data) => {
+    const { booking, tenant } = data
+    const res = await sequelize.transaction(async (tx) => {
+      const b = await Booking.findByPk(booking.id)
+      const t = await Tenant.findByPk(tenant.id)
+      if (!b || !t) throw new Error('could not find the booking or the associated tenant')
+      const updated_booking = await b.update({ ...booking }, { transaction: tx })
+      const updated_tenant = await t.update({ ...tenant }, { transaction: tx })
+
+      return { booking: updated_booking, tenant: updated_tenant }
+    })
+    return res
+  },
+
+  'booking:delete': async (_, data) => {
+    const affected = await Booking.destroy({ where: { id: data.id } })
+    return { affected }
   },
 
   'window:newchild': (_, data) => {

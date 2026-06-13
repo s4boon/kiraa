@@ -1,11 +1,16 @@
-import { BookingModelType } from '@shared/types'
+import { BookingModelType, TenantModelType } from '@shared/types'
 import { createContext, ReactNode, useContext, useState } from 'react'
 
 // --- State machine types ---
 
 type DisplayState = { mode: 'display' }
 type SelectState = { mode: 'select'; firstSelection?: Date }
-type EditState = { mode: 'edit'; booking: BookingModelType; adjusting?: 'start' | 'end' }
+type EditState = {
+  mode: 'edit'
+  booking: BookingModelType
+  tenant: TenantModelType
+  adjusting?: 'start' | 'end'
+}
 
 export type CalendarState = DisplayState | SelectState | EditState
 
@@ -56,7 +61,7 @@ type CalendarContextType = {
   // transitions
   enterDisplay: () => void
   enterSelect: () => void
-  enterEdit: (booking: BookingModelType) => void
+  enterEdit: (booking: BookingModelType, tenant: TenantModelType) => void
   selectHalf: (date: Date, half: 'AM' | 'PM') => void
   hoverHalf: (date: Date, half: 'AM' | 'PM') => void
   grabBoundary: (which: 'start' | 'end') => void
@@ -89,8 +94,8 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
     setHoveredHalf(undefined)
   }
 
-  function enterEdit(booking: BookingModelType) {
-    setCalendarState({ mode: 'edit', booking })
+  function enterEdit(booking: BookingModelType, tenant: TenantModelType) {
+    setCalendarState({ mode: 'edit', booking, tenant })
     setStartSelection(undefined)
     setEndSelection(undefined)
     setHoveredHalf(undefined)
@@ -147,7 +152,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
 
   function commitBoundary(date: Date, half: 'AM' | 'PM') {
     if (calendarState.mode !== 'edit' || !calendarState.adjusting) return
-    const { booking, adjusting } = calendarState
+    const { booking, adjusting, tenant } = calendarState
     const clicked = toHalfDate(date, half)
 
     const newBooking: BookingModelType = {
@@ -156,7 +161,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
       endDate: adjusting === 'end' ? clicked : booking.endDate
     }
 
-    setCalendarState({ mode: 'edit', booking: newBooking })
+    setCalendarState({ mode: 'edit', booking: newBooking, tenant })
     setHoveredHalf(undefined)
   }
 

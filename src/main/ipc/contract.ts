@@ -1,5 +1,6 @@
 import type { QueryKeyName } from '@shared/query_keys'
 import {
+  BookingModel,
   BookingModelType,
   GroupModelType,
   RoomModelType,
@@ -47,15 +48,22 @@ export interface APIChannels {
   }
   'booking:create': {
     input: {
-      checkin: Date
-      checkout: Date
-      total: number
-      paid: number
-      room_name: string
+      booking: Omit<CreationAttributes<BookingModel>, 'tenantId' | 'roomId'>
       tenant: CreationAttributes<TenantModel>
-      additional?: string
+      room_name: string
     }
     output: { booking: BookingModelType }
+  }
+  'booking:update': {
+    input: {
+      booking: Omit<CreationAttributes<BookingModel>, 'tenantId' | 'roomId'>
+      tenant: CreationAttributes<TenantModel>
+    }
+    output: { booking: BookingModelType; tenant: TenantModelType }
+  }
+  'booking:delete': {
+    input: { id: number }
+    output: { affected: number }
   }
   'window:newchild': {
     input: { route: string }

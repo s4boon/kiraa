@@ -1,4 +1,3 @@
-import { toProperCase } from '@/lib/utils'
 import { RoomModelType } from '@shared/types'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Plus, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -8,6 +7,14 @@ import { BookingWithTenant, CalendarCell } from './calendar_grid'
 import { CalendarSelect } from './calendar_select'
 import { useCalendar } from './context/calendar_context'
 import { Button } from './ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from './ui/select'
 
 type CalendarProps = {
   room: RoomModelType
@@ -53,7 +60,7 @@ export default function Calendar({ room, bookings }: CalendarProps) {
         <div className="flex gap-x-1 items-center [&>button]:cursor-pointer">
           <Button
             variant={'ghost'}
-            size={'icon-xs'}
+            size={'icon'}
             onClick={() => setCurrent((d) => new Date(d.getFullYear() - 1, d.getMonth(), 1))}
             className="p-1 border rounded"
           >
@@ -61,7 +68,7 @@ export default function Calendar({ room, bookings }: CalendarProps) {
           </Button>
           <Button
             variant={'ghost'}
-            size={'icon-xs'}
+            size={'icon'}
             onClick={() => setCurrent((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
             className="p-1 border rounded"
           >
@@ -69,7 +76,7 @@ export default function Calendar({ room, bookings }: CalendarProps) {
           </Button>
           <Button
             variant={'ghost'}
-            size={'icon-xs'}
+            size={'icon'}
             onClick={() => setCurrent((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
             className="p-1 border rounded"
           >
@@ -77,7 +84,7 @@ export default function Calendar({ room, bookings }: CalendarProps) {
           </Button>
           <Button
             variant={'ghost'}
-            size={'icon-xs'}
+            size={'icon'}
             onClick={() => setCurrent((d) => new Date(d.getFullYear() + 1, d.getMonth(), 1))}
             className="p-1 border rounded"
           >
@@ -85,17 +92,21 @@ export default function Calendar({ room, bookings }: CalendarProps) {
           </Button>
         </div>
 
-        <div className="font-semibold">
-          {toProperCase(current.toLocaleString('ar-DZ', { month: 'long', year: 'numeric' }))}
+        <div dir="rtl" className="font-semibold flex space-x-1.5">
+          <div>{current.toLocaleDateString('ar-DZ', { month: 'long' })}</div>
+          <div>{current.toLocaleString('ar-DZ', { year: 'numeric' })}</div>
         </div>
 
-        <Button variant={'ghost'} size={'icon-xs'} className="cursor-pointer" onClick={toggleState}>
-          {calendarState.mode === 'display' ? (
+        {calendarState.mode === 'display' ? (
+          <Button className="cursor-pointer w-fit p" onClick={toggleState}>
+            حجز جديد
             <Plus className="size-4" />
-          ) : (
+          </Button>
+        ) : (
+          <Button onClick={enterDisplay}>
             <X className="size-4" />
-          )}
-        </Button>
+          </Button>
+        )}
       </div>
 
       {/* Weekday labels */}
@@ -116,5 +127,22 @@ export default function Calendar({ room, bookings }: CalendarProps) {
         <CalendarEdit cells={cells} bookings={bookings} />
       )}
     </div>
+  )
+}
+
+function MonthSelect({ current }: { current: Date }) {
+  return (
+    <Select>
+      <SelectTrigger className="w-[100px]">
+        <SelectValue placeholder="Theme" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectItem value="light">Light</SelectItem>
+          <SelectItem value="dark">Dark</SelectItem>
+          <SelectItem value="system">System</SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   )
 }
