@@ -1,9 +1,11 @@
 import { is } from '@electron-toolkit/utils'
-import { BrowserWindow, ipcMain, IpcMainInvokeEvent } from 'electron'
+import { RoomModel } from '@shared/types'
+import { BrowserWindow, dialog, ipcMain, IpcMainInvokeEvent } from 'electron'
 import path from 'path'
+import { Op } from 'sequelize'
 import { Booking, Group, Room } from '../db/models'
-import { sequelize } from '../db/sequelize'
 import type { APIChannels, ChannelName, EventChannelName, EventChannels } from './contract'
+import { searchRooms } from './utils'
 
 type Handler<K extends ChannelName> = (
   event: IpcMainInvokeEvent,
@@ -98,6 +100,26 @@ const handlers: {
     }
   },
 
+  'room:search': async (_, data) => {
+    const rooms = await Room.findAll({
+      include: [Booking]
+    })
+
+    const sorted = searchRooms(rooms, data.free_days)
+
+    const final = sorted.map((e) => {
+      return {
+        data: e.room.get({ plain: true }),
+        earliest: e.earliestAvailableStart,
+        bookings: (e.room.Bookings ?? []).map((b) => b.get({ plain: true }))
+      }
+    })
+
+    return {
+      rooms: final
+    }
+  },
+
   'booking:create': async (_, data) => {
     const { booking, room_name } = data
 
@@ -124,7 +146,78 @@ const handlers: {
     return { affected }
   },
 
-  'window:newchild': (_, data) => {
+  'booking:search': async (_, data) => {
+    const limit = data.per_page ?? 0
+    const offset = data.page ?? 0
+    let room: RoomModel | null = null
+    if (data.room?.trim() != '') {
+      room = await Room.findOne({
+        where: {
+          name: data.room
+        }
+      })
+    }
+    const { count, rows } = await Booking.findAndCountAll({
+      where: {
+        ...(data.tenant && {
+          tenant: {
+            [Op.like]: `%${data.tenant}%`
+          }
+        }),
+
+        ...(data.contact && {
+          contact: {
+            [Op.like]: `%${data.contact}%`
+          }
+        }),
+
+        ...(room?.dataValues?.id && {
+          roomId: room.dataValues.id
+        })
+      },
+      limit,
+      offset: offset * limit
+    })
+    return { bookings: rows.map((b) => b.get({ plain: true })), total: count }
+  },
+
+  'data:list': async () => {
+    const recent_bookings = await Booking.findAll({ limit: 3, order: [['id', 'DESC']] })
+    const booking_count = await Booking.count()
+    const rooms = await Room.findAll()
+    const now = new Date()
+    const active_bookings = await Booking.findAll({
+      where: {
+        startDate: {
+          [Op.lte]: now
+        },
+        endDate: {
+          [Op.gte]: now
+        }
+      }
+    })
+
+    return {
+      booking_count,
+      recent_bookings: recent_bookings.map((b) => b.get({ plain: true })),
+      rooms: rooms.map((r) => r.get({ plain: true })),
+      todays_bookings: active_bookings.length
+    }
+  },
+
+  'db:import': async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return { filepath: null }
+    const result = await dialog.showOpenDialog(win, {
+      title: 'Import database',
+      filters: [{ name: 'SQLite DB', extensions: ['db'] }],
+      properties: ['openFile']
+    })
+
+    if (result.canceled || !result.filePaths.length) return { filepath: null }
+    return { filepath: result.filePaths[0] }
+  },
+  'window:newchild': (event, data) => {
     const child = new BrowserWindow({
       width: 800,
       height: 600,

@@ -30,13 +30,17 @@ function buildCalendar(year: number, month: number): CalendarCell[] {
 }
 
 export default function Calendar({ room, bookings }: CalendarProps) {
-  const { calendarState, enterDisplay, enterSelect, clearSelection } = useCalendar()
+  const { selectedDate, calendarState, enterDisplay, enterSelect, clearSelection } = useCalendar()
 
   useEffect(() => {
     clearSelection()
   }, [room])
 
-  const [current, setCurrent] = useState(() => new Date())
+  const [current, setCurrent] = useState(new Date())
+
+  useEffect(() => {
+    if (selectedDate) setCurrent(selectedDate)
+  }, [selectedDate])
 
   const cells = useMemo(() => buildCalendar(current.getFullYear(), current.getMonth()), [current])
 

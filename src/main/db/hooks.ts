@@ -19,8 +19,7 @@ export function on<K extends EventKeys>(event: K, cb: (payload: Events[K]) => vo
   hookEvents.on(event, cb)
 }
 
-//chatgpt said sequelize shouldn't depend on the main process, so we make an event emitter and make the main process depend on sequelize
-//i think i get it (maybe)
+//sequelize shouldn't depend on the main process, so we make an event emitter and make the main process depend on sequelize
 function createInvalidateHook(key: QueryKeyName) {
   return () => {
     emit('invalidate', { key })
@@ -41,8 +40,8 @@ export function registerHooks() {
   Room.afterDestroy(invalidateRoom)
   Room.afterBulkDestroy(invalidateRoom)
 
-  Booking.afterCreate(invalidateRoom)
-  Booking.afterUpdate(invalidateRoom)
-  Booking.afterDestroy(invalidateRoom)
-  Booking.afterBulkDestroy(invalidateRoom)
+  Booking.afterCreate(invalidateBooking)
+  Booking.afterUpdate(invalidateBooking)
+  Booking.afterDestroy(invalidateBooking)
+  Booking.afterBulkDestroy(invalidateBooking)
 }

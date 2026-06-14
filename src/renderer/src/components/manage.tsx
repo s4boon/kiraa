@@ -1,4 +1,4 @@
-import { HousePlus } from 'lucide-react'
+import { Settings2 } from 'lucide-react'
 import { Button } from './ui/button'
 
 type Props = {}
@@ -12,7 +12,7 @@ export default function manage({}: Props) {
         window.ipcAPI.invoke('window:newchild', { route: '/manage' })
       }}
     >
-      <HousePlus className="size-5" />
+      <Settings2 className="size-5" />
     </Button>
   )
 }

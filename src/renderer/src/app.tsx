@@ -6,6 +6,8 @@ import HomePage from './routes/home'
 import Manage from './routes/manage'
 import RoomsPage from './routes/rooms'
 import RoomsRedirect from './routes/rooms_redirect'
+import Search from './routes/search'
+import Tenants from './routes/tenants'
 
 export default function App() {
   useEffect(() => {
@@ -19,7 +21,9 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path={'/'} element={<HomePage />} />
           <Route path="/rooms" element={<RoomsRedirect />} />
-          <Route path="/rooms/:name" element={<RoomsPage />} />
+          <Route path="/rooms/:name?" element={<RoomsPage />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/tenants" element={<Tenants />} />
         </Route>
 
         <Route path="/manage" element={<Manage />} />

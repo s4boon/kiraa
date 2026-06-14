@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { assignColor } from './calendar_grid'
 import { getHalf, useCalendar } from './context/calendar_context'
+import { Invoice, InvoiceProps } from './print_invoice'
 import { Button } from './ui/button'
 import {
   Dialog,
@@ -77,6 +78,12 @@ export default function bookings({
 
 function Booking({ booking, room }: { booking: BookingModelType; room: string }) {
   const { enterEdit } = useCalendar()
+  const [printBooking, setPrintBooking] = useState<InvoiceProps | null>(null)
+  useEffect(() => {
+    if (!printBooking) return
+
+    window.print()
+  }, [printBooking])
   return (
     <div className="grid gap-y-1.5">
       <div className="flex space-x-1.5">
@@ -192,7 +199,12 @@ function Booking({ booking, room }: { booking: BookingModelType; room: string })
         </p>
       </Field>
       <div className="flex space-x-2 my-2">
-        <Button className="flex-1">
+        <Button
+          className="flex-1"
+          onClick={() => {
+            setPrintBooking({ booking: booking, roomName: room })
+          }}
+        >
           طبع
           <Printer />
         </Button>
@@ -202,6 +214,8 @@ function Booking({ booking, room }: { booking: BookingModelType; room: string })
         </Button>
         <DeleteBooking id={booking.id} />
       </div>
+
+      <div id="print-area">{printBooking && <Invoice {...printBooking} />}</div>
     </div>
   )
 }

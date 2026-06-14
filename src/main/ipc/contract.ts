@@ -32,6 +32,17 @@ export interface APIChannels {
     output: { room: RoomModelType }
   }
 
+  'room:search': {
+    input: { free_days: number }
+    output: {
+      rooms: {
+        data: RoomModelType
+        earliest: Date
+        bookings: BookingModelType[]
+      }[]
+    }
+  }
+
   'room:bookings': {
     input: { name: string }
     output: {
@@ -56,9 +67,26 @@ export interface APIChannels {
     input: { id: number }
     output: { affected: number }
   }
+  'booking:search': {
+    input: { tenant?: string; contact?: string; room?: string; page?: number; per_page?: number }
+    output: { bookings: BookingModelType[]; total: number }
+  }
+  'data:list': {
+    input: void
+    output: {
+      recent_bookings: BookingModelType[]
+      booking_count: number
+      rooms: RoomModelType[]
+      todays_bookings: number
+    }
+  }
   'window:newchild': {
     input: { route: string }
     output: void
+  }
+  'db:import': {
+    input: void
+    output: { filepath: string | null }
   }
 }
 

@@ -139,3 +139,70 @@ body,
     @apply bg-background text-foreground;
   }
 }
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+
+  #print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    background: white;
+  }
+
+  /* Optional: prevent awkward page breaks */
+  #print-area table,
+  #print-area tr,
+  #print-area td,
+  #print-area th {
+    page-break-inside: avoid;
+  }
+}
+
+@media screen {
+  #print-area {
+    display: none;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+
+  #print-area {
+    display: block;
+    position: absolute;
+    inset: 0;
+  }
+}

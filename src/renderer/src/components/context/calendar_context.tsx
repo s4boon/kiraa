@@ -39,6 +39,10 @@ export function isSameDay(a: Date, b: Date): boolean {
   return dayTimestamp(a) === dayTimestamp(b)
 }
 
+export function isSameMonth(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth()
+}
+
 export function isDayInRange(date: Date, from: Date, to: Date): boolean {
   const d = dayTimestamp(date)
   return dayTimestamp(from) <= d && d <= dayTimestamp(to)

@@ -11,7 +11,7 @@ type Group = {
 export default function rooms({ groups }: { groups: Group[] }) {
   return groups.map((group) => {
     return (
-      <Collapsible key={group.data.id}>
+      <Collapsible key={group.data.id} defaultOpen={true}>
         <CollapsibleTrigger className="px-2 py-1 w-full text-start cursor-pointer hover:brightness-110 rounded-sm border my-1 bg-accent/50">
           {group.data.name}
         </CollapsibleTrigger>

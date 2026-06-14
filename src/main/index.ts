@@ -8,11 +8,13 @@ import { on, registerHooks } from './db/hooks'
 import { sequelize } from './db/sequelize'
 import { notifyAllWindows, registerHandlers } from './ipc/handlers'
 
+// console.log('DATABASE_PATH:', dbPath)
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1200,
+    height: 720,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -22,6 +24,8 @@ function createWindow(): void {
       sandbox: false
     }
   })
+
+  mainWindow.setMenuBarVisibility(false)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
