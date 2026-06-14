@@ -8,7 +8,7 @@ export const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: dbPath,
   logging: false,
-  sync: { alter: true }
+  sync: { force: true }
 })
 
 sequelize.query('PRAGMA foreign_keys = ON')

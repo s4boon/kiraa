@@ -27,17 +27,6 @@ interface RoomModel extends Model<InferAttributes<RoomModel>, InferCreationAttri
   Bookings?: NonAttribute<BookingModel[]>
 }
 
-interface TenantModel extends Model<
-  InferAttributes<TenantModel>,
-  InferCreationAttributes<TenantModel>
-> {
-  id: CreationOptional<string>
-  name: string
-  contactInfo: CreationOptional<string | null>
-
-  Bookings?: NonAttribute<BookingModel[]>
-}
-
 interface BookingModel extends Model<
   InferAttributes<BookingModel>,
   InferCreationAttributes<BookingModel>
@@ -47,19 +36,16 @@ interface BookingModel extends Model<
   startDate: Date
   endDate: Date
 
+  tenant: string
+  contact: string
   total: CreationOptional<number | null>
   paid: CreationOptional<number | null>
-  status: CreationOptional<'booked' | 'confirmed'>
   additionalInfo: CreationOptional<string | null>
 
   roomId: number
-  tenantId: string
-
   Room?: NonAttribute<RoomModel>
-  Tenant?: NonAttribute<TenantModel>
 }
 
 export type GroupModelType = Attributes<GroupModel>
 export type RoomModelType = Attributes<RoomModel>
-export type TenantModelType = Attributes<TenantModel>
 export type BookingModelType = Attributes<BookingModel>

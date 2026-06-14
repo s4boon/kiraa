@@ -1,12 +1,5 @@
 import type { QueryKeyName } from '@shared/query_keys'
-import {
-  BookingModel,
-  BookingModelType,
-  GroupModelType,
-  RoomModelType,
-  TenantModel,
-  TenantModelType
-} from '@shared/types'
+import { BookingModel, BookingModelType, GroupModelType, RoomModelType } from '@shared/types'
 import { CreationAttributes } from 'sequelize'
 export interface APIChannels {
   'group:create': {
@@ -43,23 +36,21 @@ export interface APIChannels {
     input: { name: string }
     output: {
       room: RoomModelType
-      bookings: { data: BookingModelType; tenant: TenantModelType }[]
+      bookings: BookingModelType[]
     }
   }
   'booking:create': {
     input: {
-      booking: Omit<CreationAttributes<BookingModel>, 'tenantId' | 'roomId'>
-      tenant: CreationAttributes<TenantModel>
+      booking: Omit<CreationAttributes<BookingModel>, 'roomId'>
       room_name: string
     }
     output: { booking: BookingModelType }
   }
   'booking:update': {
     input: {
-      booking: Omit<CreationAttributes<BookingModel>, 'tenantId' | 'roomId'>
-      tenant: CreationAttributes<TenantModel>
+      booking: Omit<CreationAttributes<BookingModel>, 'roomId'>
     }
-    output: { booking: BookingModelType; tenant: TenantModelType }
+    output: { booking: BookingModelType }
   }
   'booking:delete': {
     input: { id: number }

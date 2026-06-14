@@ -1,4 +1,3 @@
-import { TenantModel } from '@shared/types'
 import { useState } from 'react'
 import { CreationAttributes } from 'sequelize'
 import { toast } from 'sonner'
@@ -7,6 +6,7 @@ import { Button } from './ui/button'
 import { Field, FieldLabel, FieldSeparator } from './ui/field'
 import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
+import { BookingModel } from '@shared/types'
 
 type Props = {
   room: string
@@ -18,13 +18,8 @@ export default function booking_form({ room }: Props) {
   const [total, setTotal] = useState(0)
   const { startSelection, endSelection, enterDisplay } = useCalendar()
   async function CreateBooking(
-    checkin: Date,
-    checkout: Date,
-    total: number,
-    paid: number,
-    room_name: string,
-    tenant: CreationAttributes<TenantModel>,
-    additional?: string
+    booking: Omit<CreationAttributes<BookingModel>, 'roomId'>,
+    room_name: string
   ) {
     setIsLoading(true)
     if (total < paid) {
@@ -32,17 +27,7 @@ export default function booking_form({ room }: Props) {
       return
     }
     await window.ipcAPI
-      .invoke('booking:create', {
-        booking: {
-          startDate: checkin,
-          endDate: checkout,
-          paid: paid,
-          total: total,
-          additionalInfo: additional
-        },
-        room_name,
-        tenant
-      })
+      .invoke('booking:create', { booking, room_name })
       .then(() => toast.success('تم الحجز'))
       .catch(() => toast.error('فشلت العملية'))
       .finally(() => setIsLoading(false))
@@ -59,16 +44,16 @@ export default function booking_form({ room }: Props) {
         const paid = Number(e.currentTarget.paid.value)
         const notes = e.currentTarget.notes.value
         await CreateBooking(
-          startSelection,
-          endSelection,
-          total ?? 0,
-          paid ?? 0,
-          room,
           {
-            name: tenant_name,
-            contactInfo: tenant_contact
+            startDate: startSelection,
+            endDate: endSelection,
+            tenant: tenant_name,
+            contact: tenant_contact,
+            paid,
+            total,
+            additionalInfo: notes
           },
-          notes
+          room
         )
       }}
     >

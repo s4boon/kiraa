@@ -1,4 +1,4 @@
-import { BookingModel, TenantModel } from '@shared/types'
+import { BookingModel } from '@shared/types'
 import { useState } from 'react'
 import { CreationAttributes } from 'sequelize'
 import { toast } from 'sonner'
@@ -17,14 +17,11 @@ export default function booking_edit_form({ room }: Props) {
 
   const { calendarState, enterDisplay } = useCalendar()
   if (calendarState.mode != 'edit') return null
-  const { booking, tenant } = calendarState
-  async function UpdateBooking(
-    booking: Omit<CreationAttributes<BookingModel>, 'tenantId' | 'roomId'>,
-    tenant: CreationAttributes<TenantModel>
-  ) {
+  const { booking } = calendarState
+  async function UpdateBooking(booking: Omit<CreationAttributes<BookingModel>, 'roomId'>) {
     setIsLoading(true)
     await window.ipcAPI
-      .invoke('booking:update', { booking, tenant })
+      .invoke('booking:update', { booking })
       .then(() => {
         toast.success('تم تعديل الحجز')
         enterDisplay()
@@ -47,10 +44,14 @@ export default function booking_edit_form({ room }: Props) {
         const paid = Number(e.currentTarget.paid.value ?? 0)
         const notes = e.currentTarget.notes.value ?? ''
         console.log(tenant_name, tenant_contact, total, paid, notes, booking)
-        await UpdateBooking(
-          { ...booking, additionalInfo: notes, paid, total },
-          { name: tenant_name, contactInfo: tenant_contact, id: tenant.id }
-        )
+        await UpdateBooking({
+          ...booking,
+          additionalInfo: notes,
+          paid,
+          total,
+          tenant: tenant_name,
+          contact: tenant_contact
+        })
       }}
     >
       <Field>
@@ -59,7 +60,7 @@ export default function booking_edit_form({ room }: Props) {
           id="tenant_name"
           name="tanant_name"
           type="text"
-          defaultValue={tenant.name}
+          defaultValue={booking.tenant}
           required
         />
       </Field>
@@ -69,7 +70,7 @@ export default function booking_edit_form({ room }: Props) {
           id="tenant_contact"
           name="tanant_contact"
           type="text"
-          defaultValue={tenant.contactInfo ?? ''}
+          defaultValue={booking.contact ?? ''}
         />
       </Field>
       <div className=" text-sm text-accent-foreground">
@@ -120,7 +121,9 @@ export default function booking_edit_form({ room }: Props) {
         />
       </Field>
       <div className="flex space-x-2 my-2">
-        <Button className="flex-1">حفظ</Button>
+        <Button type="submit" disabled={isLoading} className="flex-1">
+          حفظ
+        </Button>
         <Button className="flex-1" variant={'destructive'} onClick={enterDisplay}>
           إلغاء
         </Button>

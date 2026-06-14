@@ -1,9 +1,10 @@
-import { BookingWithTenant, CalendarCell, CalendarGrid, HalfSlotStyle } from './calendar_grid'
+import { BookingModelType } from '@shared/types'
+import { CalendarCell, CalendarGrid, HalfSlotStyle } from './calendar_grid'
 import { useCalendar } from './context/calendar_context'
 
 type CalendarDisplayProps = {
   cells: CalendarCell[]
-  bookings: BookingWithTenant[]
+  bookings: BookingModelType[]
 }
 
 export function CalendarDisplay({ cells, bookings }: CalendarDisplayProps) {
@@ -12,18 +13,14 @@ export function CalendarDisplay({ cells, bookings }: CalendarDisplayProps) {
   function getHalfStyle(
     _date: Date,
     _half: 'AM' | 'PM',
-    booking: (BookingWithTenant & { color: string }) | undefined
+    booking: (BookingModelType & { color: string }) | undefined
   ): HalfSlotStyle {
     return {
       style: booking ? { backgroundColor: booking.color } : undefined
     }
   }
 
-  function handleHalfClick(
-    date: Date,
-    _half: 'AM' | 'PM',
-    _booking: BookingWithTenant | undefined
-  ) {
+  function handleHalfClick(date: Date, _half: 'AM' | 'PM', _booking: BookingModelType | undefined) {
     setSelectedDate(date)
   }
 

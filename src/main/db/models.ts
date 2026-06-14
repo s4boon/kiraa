@@ -1,4 +1,4 @@
-import { BookingModel, GroupModel, RoomModel, TenantModel } from '@shared/types'
+import { BookingModel, GroupModel, RoomModel } from '@shared/types'
 import { DataTypes } from 'sequelize'
 import { sequelize } from './sequelize'
 
@@ -34,21 +34,6 @@ export const Room = sequelize.define<RoomModel>('Room', {
   }
 })
 
-export const Tenant = sequelize.define<TenantModel>('Tenant', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  contactInfo: {
-    type: DataTypes.STRING
-  }
-})
-
 export const Booking = sequelize.define<BookingModel>('Booking', {
   id: {
     type: DataTypes.INTEGER,
@@ -63,25 +48,25 @@ export const Booking = sequelize.define<BookingModel>('Booking', {
     type: DataTypes.DATE,
     allowNull: false
   },
+  tenant: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  contact: {
+    type: DataTypes.STRING
+  },
   total: {
     type: DataTypes.INTEGER
   },
   paid: {
     type: DataTypes.INTEGER
   },
-  status: {
-    type: DataTypes.ENUM('booked', 'confirmed'),
-    defaultValue: 'booked'
-  },
+
   additionalInfo: {
     type: DataTypes.STRING
   },
   roomId: {
     type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  tenantId: {
-    type: DataTypes.UUID,
     allowNull: false
   }
 })
@@ -90,5 +75,3 @@ Group.hasMany(Room, { foreignKey: 'groupId' })
 Room.belongsTo(Group, { foreignKey: 'groupId', onDelete: 'CASCADE' })
 Room.hasMany(Booking, { foreignKey: 'roomId' })
 Booking.belongsTo(Room, { foreignKey: 'roomId', onDelete: 'CASCADE' })
-Tenant.hasMany(Booking, { foreignKey: 'tenantId' })
-Booking.belongsTo(Tenant, { foreignKey: 'tenantId', onDelete: 'CASCADE' })

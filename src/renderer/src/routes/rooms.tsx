@@ -52,7 +52,7 @@ export default function RoomsPage({}: Props) {
           <Bookings
             room={roomName}
             bookings={bookings.filter(
-              (b) => selectedDate && isDayInRange(selectedDate, b.data.startDate, b.data.endDate)
+              (b) => selectedDate && isDayInRange(selectedDate, b.startDate, b.endDate)
             )}
           />
         ) : calendarState.mode == 'select' ? (

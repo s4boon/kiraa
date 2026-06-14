@@ -1,4 +1,4 @@
-import { BookingModelType, TenantModelType } from '@shared/types'
+import { BookingModelType } from '@shared/types'
 import { createContext, ReactNode, useContext, useState } from 'react'
 
 // --- State machine types ---
@@ -8,7 +8,6 @@ type SelectState = { mode: 'select'; firstSelection?: Date }
 type EditState = {
   mode: 'edit'
   booking: BookingModelType
-  tenant: TenantModelType
   adjusting?: 'start' | 'end'
 }
 
@@ -61,7 +60,7 @@ type CalendarContextType = {
   // transitions
   enterDisplay: () => void
   enterSelect: () => void
-  enterEdit: (booking: BookingModelType, tenant: TenantModelType) => void
+  enterEdit: (booking: BookingModelType) => void
   selectHalf: (date: Date, half: 'AM' | 'PM') => void
   hoverHalf: (date: Date, half: 'AM' | 'PM') => void
   grabBoundary: (which: 'start' | 'end') => void
@@ -94,8 +93,8 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
     setHoveredHalf(undefined)
   }
 
-  function enterEdit(booking: BookingModelType, tenant: TenantModelType) {
-    setCalendarState({ mode: 'edit', booking, tenant })
+  function enterEdit(booking: BookingModelType) {
+    setCalendarState({ mode: 'edit', booking })
     setStartSelection(undefined)
     setEndSelection(undefined)
     setHoveredHalf(undefined)
@@ -152,7 +151,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
 
   function commitBoundary(date: Date, half: 'AM' | 'PM') {
     if (calendarState.mode !== 'edit' || !calendarState.adjusting) return
-    const { booking, adjusting, tenant } = calendarState
+    const { booking, adjusting } = calendarState
     const clicked = toHalfDate(date, half)
 
     const newBooking: BookingModelType = {
@@ -161,7 +160,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
       endDate: adjusting === 'end' ? clicked : booking.endDate
     }
 
-    setCalendarState({ mode: 'edit', booking: newBooking, tenant })
+    setCalendarState({ mode: 'edit', booking: newBooking })
     setHoveredHalf(undefined)
   }
 

@@ -1,7 +1,7 @@
 import { is } from '@electron-toolkit/utils'
 import { BrowserWindow, ipcMain, IpcMainInvokeEvent } from 'electron'
 import path from 'path'
-import { Booking, Group, Room, Tenant } from '../db/models'
+import { Booking, Group, Room } from '../db/models'
 import { sequelize } from '../db/sequelize'
 import type { APIChannels, ChannelName, EventChannelName, EventChannels } from './contract'
 
@@ -86,62 +86,37 @@ const handlers: {
         name: data.name
       },
       include: {
-        model: Booking,
-        include: [Tenant]
+        model: Booking
       }
     })
 
-    if (!room) {
-      throw new Error(`couldn't find room "${data.name}"`)
-    }
+    if (!room) throw new Error(`couldn't find room "${data.name}"`)
 
     return {
       room: room.get({ plain: true }),
-      bookings: (room.Bookings ?? []).map((b) => ({
-        data: b.get({ plain: true }),
-        tenant: b.Tenant!.get({ plain: true })
-      }))
+      bookings: (room.Bookings ?? []).map((b) => b.get({ plain: true }))
     }
   },
 
   'booking:create': async (_, data) => {
-    const { booking, tenant, room_name } = data
-    const { endDate, startDate, additionalInfo, paid, total } = booking
+    const { booking, room_name } = data
 
-    const res = await sequelize.transaction(async (t) => {
-      const room = await Room.findOne({ where: { name: room_name } })
-      if (!room) throw new Error('could not find room')
-      const [tenant_] = await Tenant.findOrCreate({ where: { ...tenant }, transaction: t })
-      const booking = await Booking.create(
-        {
-          startDate,
-          endDate,
-          additionalInfo,
-          status: 'booked',
-          total: total,
-          paid: paid,
-          roomId: room.get({ plain: true }).id,
-          tenantId: tenant_.get({ plain: true }).id
-        },
-        { transaction: t }
-      )
-      return booking
+    const room = await Room.findOne({ where: { name: room_name } })
+    if (!room) throw new Error('could not find room')
+    const b = await Booking.create({
+      ...booking,
+      roomId: room.get({ plain: true }).id
     })
-    return { booking: res.get({ plain: true }) }
+    return { booking: b }
   },
 
   'booking:update': async (_, data) => {
-    const { booking, tenant } = data
-    const res = await sequelize.transaction(async (tx) => {
-      const b = await Booking.findByPk(booking.id)
-      const t = await Tenant.findByPk(tenant.id)
-      if (!b || !t) throw new Error('could not find the booking or the associated tenant')
-      const updated_booking = await b.update({ ...booking }, { transaction: tx })
-      const updated_tenant = await t.update({ ...tenant }, { transaction: tx })
+    const { booking } = data
 
-      return { booking: updated_booking, tenant: updated_tenant }
-    })
-    return res
+    const b = await Booking.findByPk(booking.id)
+    if (!b) throw new Error('could not find the booking or the associated tenant')
+    const updated_booking = await b.update({ ...booking })
+    return { booking: updated_booking }
   },
 
   'booking:delete': async (_, data) => {

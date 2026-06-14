@@ -1,16 +1,11 @@
 import { useMemo } from 'react'
-import {
-  assignColor,
-  BookingWithTenant,
-  CalendarCell,
-  CalendarGrid,
-  HalfSlotStyle
-} from './calendar_grid'
+import { assignColor, CalendarCell, CalendarGrid, HalfSlotStyle } from './calendar_grid'
 import { dayTimestamp, isInRange, toHalfDate, useCalendar } from './context/calendar_context'
+import { BookingModelType } from '@shared/types'
 
 type CalendarEditProps = {
   cells: CalendarCell[]
-  bookings: BookingWithTenant[]
+  bookings: BookingModelType[]
 }
 
 /** Returns the half-day slot immediately after a given date (+12h) */
@@ -33,7 +28,7 @@ export function CalendarEdit({ cells, bookings }: CalendarEditProps) {
   const BOOKING_COLOR = assignColor(booking.id)
 
   // Other bookings excluding the one being edited
-  const otherBookings = bookings.filter((b) => b.data.id !== booking.id)
+  const otherBookings = bookings.filter((b) => b.id !== booking.id)
 
   // Preview start/end while hovering during adjustment
   const previewStart = adjusting === 'start' && hoveredHalf ? hoveredHalf : booking.startDate
@@ -44,15 +39,15 @@ export function CalendarEdit({ cells, bookings }: CalendarEditProps) {
     if (!adjusting) return undefined
 
     const othersSorted = [...otherBookings].sort(
-      (a, b) => a.data.startDate.getTime() - b.data.startDate.getTime()
+      (a, b) => a.startDate.getTime() - b.startDate.getTime()
     )
 
     if (adjusting === 'start') {
       // Can go back to right after the previous booking ends
       const prevBooking = [...othersSorted]
         .reverse()
-        .find((b) => b.data.endDate.getTime() < booking.startDate.getTime())
-      const lowerBound = prevBooking ? nextHalf(prevBooking.data.endDate) : new Date(0)
+        .find((b) => b.endDate.getTime() < booking.startDate.getTime())
+      const lowerBound = prevBooking ? nextHalf(prevBooking.endDate) : new Date(0)
 
       // Can go forward up to PM of the day before the end day (min 1 full day)
       const upperBound = toHalfDate(new Date(dayTimestamp(booking.endDate) - 86400000), 'PM')
@@ -65,12 +60,8 @@ export function CalendarEdit({ cells, bookings }: CalendarEditProps) {
     const lowerBound = toHalfDate(new Date(dayTimestamp(booking.startDate) + 86400000), 'AM')
 
     // Can go forward up to right before the next booking starts
-    const nextBooking = othersSorted.find(
-      (b) => b.data.startDate.getTime() > booking.endDate.getTime()
-    )
-    const upperBound = nextBooking
-      ? prevHalf(nextBooking.data.startDate)
-      : new Date(8640000000000000)
+    const nextBooking = othersSorted.find((b) => b.startDate.getTime() > booking.endDate.getTime())
+    const upperBound = nextBooking ? prevHalf(nextBooking.startDate) : new Date(8640000000000000)
 
     return { from: lowerBound, to: upperBound }
   }, [adjusting, booking, otherBookings])
@@ -78,7 +69,7 @@ export function CalendarEdit({ cells, bookings }: CalendarEditProps) {
   function getHalfStyle(
     date: Date,
     half: 'AM' | 'PM',
-    bookingSlot: (BookingWithTenant & { color: string }) | undefined
+    bookingSlot: (BookingModelType & { color: string }) | undefined
   ): HalfSlotStyle {
     const isCurrentMonth = date.getMonth() == cells.at(17)?.date.getMonth()
     const halfDate = toHalfDate(date, half)
@@ -143,7 +134,7 @@ export function CalendarEdit({ cells, bookings }: CalendarEditProps) {
   function handleHalfClick(
     date: Date,
     half: 'AM' | 'PM',
-    bookingSlot: BookingWithTenant | undefined
+    bookingSlot: BookingModelType | undefined
   ) {
     const halfDate = toHalfDate(date, half)
     const isStart = booking.startDate.getTime() === halfDate.getTime()
@@ -163,7 +154,7 @@ export function CalendarEdit({ cells, bookings }: CalendarEditProps) {
   function handleHalfEnter(
     date: Date,
     half: 'AM' | 'PM',
-    bookingSlot: BookingWithTenant | undefined
+    bookingSlot: BookingModelType | undefined
   ) {
     if (!adjusting || !validRange || bookingSlot) return
     const halfDate = toHalfDate(date, half)

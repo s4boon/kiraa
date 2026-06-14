@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
-import { BookingWithTenant, CalendarCell, CalendarGrid, HalfSlotStyle } from './calendar_grid'
+import { CalendarCell, CalendarGrid, HalfSlotStyle } from './calendar_grid'
 import { getHalf, isInRange, isSameDay, toHalfDate, useCalendar } from './context/calendar_context'
+import { BookingModelType } from '@shared/types'
 
 type CalendarSelectProps = {
   cells: CalendarCell[]
-  bookings: BookingWithTenant[]
+  bookings: BookingModelType[]
 }
 
 export function CalendarSelect({ cells, bookings }: CalendarSelectProps) {
@@ -48,7 +49,7 @@ export function CalendarSelect({ cells, bookings }: CalendarSelectProps) {
   function getHalfStyle(
     date: Date,
     half: 'AM' | 'PM',
-    booking: (BookingWithTenant & { color: string }) | undefined
+    booking: (BookingModelType & { color: string }) | undefined
   ): HalfSlotStyle {
     const halfDate = toHalfDate(date, half)
     const inRange = rangeFrom && rangeTo && isInRange(halfDate, rangeFrom, rangeTo)
@@ -65,12 +66,12 @@ export function CalendarSelect({ cells, bookings }: CalendarSelectProps) {
     }
   }
 
-  function handleHalfClick(date: Date, half: 'AM' | 'PM', booking: BookingWithTenant | undefined) {
+  function handleHalfClick(date: Date, half: 'AM' | 'PM', booking: BookingModelType | undefined) {
     if (booking) return
     selectHalf(date, half)
   }
 
-  function handleHalfEnter(date: Date, half: 'AM' | 'PM', booking: BookingWithTenant | undefined) {
+  function handleHalfEnter(date: Date, half: 'AM' | 'PM', booking: BookingModelType | undefined) {
     if (booking) return
     hoverHalf(date, half)
   }

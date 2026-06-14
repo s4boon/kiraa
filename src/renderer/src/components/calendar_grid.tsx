@@ -1,11 +1,6 @@
 import { cn } from '@/lib/utils'
-import { BookingModelType, TenantModelType } from '@shared/types'
+import { BookingModelType } from '@shared/types'
 import { isSameDay, isToday, toHalfDate } from './context/calendar_context'
-
-export type BookingWithTenant = {
-  data: BookingModelType
-  tenant: TenantModelType
-}
 
 export type CalendarCell = {
   date: Date
@@ -20,15 +15,15 @@ export type HalfSlotStyle = {
 
 export type CalendarGridProps = {
   cells: CalendarCell[]
-  bookings: BookingWithTenant[]
+  bookings: BookingModelType[]
   selectedDate?: Date
   getHalfStyle: (
     date: Date,
     half: 'AM' | 'PM',
-    booking: (BookingWithTenant & { color: string }) | undefined
+    booking: (BookingModelType & { color: string }) | undefined
   ) => HalfSlotStyle
-  onHalfClick: (date: Date, half: 'AM' | 'PM', booking: BookingWithTenant | undefined) => void
-  onHalfEnter?: (date: Date, half: 'AM' | 'PM', booking: BookingWithTenant | undefined) => void
+  onHalfClick: (date: Date, half: 'AM' | 'PM', booking: BookingModelType | undefined) => void
+  onHalfEnter?: (date: Date, half: 'AM' | 'PM', booking: BookingModelType | undefined) => void
   onMouseLeave?: () => void
 }
 
@@ -48,7 +43,7 @@ export function CalendarGrid({
 }: CalendarGridProps) {
   const bookings_ = bookings.map((b) => ({
     ...b,
-    color: assignColor(b.data.id!)
+    color: assignColor(b.id!)
   }))
 
   return (
@@ -63,13 +58,11 @@ export function CalendarGrid({
 
         const amBooking = bookings_.find(
           (b) =>
-            b.data.startDate.getTime() <= amDate.getTime() &&
-            amDate.getTime() <= b.data.endDate.getTime()
+            b.startDate.getTime() <= amDate.getTime() && amDate.getTime() <= b.endDate.getTime()
         )
         const pmBooking = bookings_.find(
           (b) =>
-            b.data.startDate.getTime() <= pmDate.getTime() &&
-            pmDate.getTime() <= b.data.endDate.getTime()
+            b.startDate.getTime() <= pmDate.getTime() && pmDate.getTime() <= b.endDate.getTime()
         )
 
         const amStyle = getHalfStyle(cell.date, 'AM', amBooking)

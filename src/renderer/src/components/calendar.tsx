@@ -1,24 +1,16 @@
-import { RoomModelType } from '@shared/types'
+import { BookingModelType, RoomModelType } from '@shared/types'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Plus, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { CalendarDisplay } from './calendar_display'
 import { CalendarEdit } from './calendar_edit'
-import { BookingWithTenant, CalendarCell } from './calendar_grid'
+import { CalendarCell } from './calendar_grid'
 import { CalendarSelect } from './calendar_select'
 import { useCalendar } from './context/calendar_context'
 import { Button } from './ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from './ui/select'
 
 type CalendarProps = {
   room: RoomModelType
-  bookings: BookingWithTenant[]
+  bookings: BookingModelType[]
 }
 
 const WEEKDAYS_AR = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
@@ -127,22 +119,5 @@ export default function Calendar({ room, bookings }: CalendarProps) {
         <CalendarEdit cells={cells} bookings={bookings} />
       )}
     </div>
-  )
-}
-
-function MonthSelect({ current }: { current: Date }) {
-  return (
-    <Select>
-      <SelectTrigger className="w-[100px]">
-        <SelectValue placeholder="Theme" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectItem value="light">Light</SelectItem>
-          <SelectItem value="dark">Dark</SelectItem>
-          <SelectItem value="system">System</SelectItem>
-        </SelectGroup>
-      </SelectContent>
-    </Select>
   )
 }
