@@ -1,9 +1,5 @@
 import { BookingModelType } from '@shared/types'
 
-type Props = {
-  booking: BookingModelType
-}
-
 export type InvoiceProps = {
   booking: BookingModelType
   roomName: string
