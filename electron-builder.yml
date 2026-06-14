@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: htl
+productName: ikama
 directories:
   buildResources: build
 files:

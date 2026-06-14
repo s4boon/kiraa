@@ -27,6 +27,7 @@ export default function rooms({ groups }: { groups: Group[] }) {
                   )
                 }
                 to={'/rooms/' + room.name}
+                replace
               >
                 {room.name}
               </NavLink>

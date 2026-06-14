@@ -1,8 +1,6 @@
 import { House, Search, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 
-type Props = {}
-
 type Route = {
   path: string
   label: string
@@ -32,15 +30,21 @@ export const ROUTES: Route[] = [
   }
 ]
 
+import { useNavbar } from '@/components/context/navbar_context'
 import { queryKeys } from '@shared/query_keys'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { BedDouble } from 'lucide-react'
+import { useEffect } from 'react'
 
 export default function Home() {
   const navigate = useNavigate()
+  const { setCrumbs } = useNavbar()
+  useEffect(() => {
+    setCrumbs('القائمة الرئيسية')
+  }, [])
 
   const dataQuery = queryOptions({
-    queryKey: queryKeys.booking,
+    queryKey: queryKeys.room,
     queryFn: () => window.ipcAPI.invoke('data:list')
   })
 

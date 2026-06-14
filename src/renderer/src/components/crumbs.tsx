@@ -1,13 +1,8 @@
-import { useLocation } from 'react-router'
-import { ROUTES } from '../routes/home'
+import { useNavbar } from './context/navbar_context'
 type Props = {}
 
 export default function crumbs({}: Props) {
-  const location = useLocation()
+  const { crumbs } = useNavbar()
 
-  return (
-    <div>
-      {ROUTES.find((route) => route.path === location.pathname)?.label || location.pathname}
-    </div>
-  )
+  return <div>{crumbs}</div>
 }

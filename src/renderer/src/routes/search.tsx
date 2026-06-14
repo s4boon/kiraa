@@ -1,4 +1,5 @@
 import { isInRange, isSameMonth } from '@/components/context/calendar_context'
+import { useNavbar } from '@/components/context/navbar_context'
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 import {
   Table,
@@ -12,7 +13,7 @@ import {
 import { queryKeys } from '@shared/query_keys'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { Search } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 type Props = {}
@@ -28,6 +29,10 @@ export default function search({}: Props) {
   const rooms = useSuspenseQuery(roomQuery).data.rooms
 
   const freedays_ref = useRef<HTMLInputElement>(null)
+  const { setCrumbs } = useNavbar()
+  useEffect(() => {
+    setCrumbs('بحث سريع')
+  }, [])
 
   return (
     <div className="h-full min-h-0">

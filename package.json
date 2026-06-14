@@ -1,10 +1,11 @@
 {
-  "name": "htl",
+  "name": "ikama",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "",
+  "productName": "ikama",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "abdou mehellel",
+  "homepage": "https://github.com/s4aboon",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",

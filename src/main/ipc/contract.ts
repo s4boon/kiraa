@@ -80,11 +80,19 @@ export interface APIChannels {
       todays_bookings: number
     }
   }
+  'window:togglefullscreen': {
+    input: void
+    output: void
+  }
   'window:newchild': {
     input: { route: string }
     output: void
   }
   'db:import': {
+    input: void
+    output: { filepath: string | null }
+  }
+  'db:export': {
     input: void
     output: { filepath: string | null }
   }
@@ -94,7 +102,6 @@ export interface EventChannels {
   'notification:new': {
     title: string
     message: string
-    type: string
   }
   'cache:invalidate': {
     key: QueryKeyName

@@ -17,6 +17,7 @@ function createWindow(): void {
     height: 720,
     show: false,
     autoHideMenuBar: true,
+    title: 'Ikama',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       devTools: is.dev,
@@ -44,6 +45,8 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
+
+app.setName('إقامة')
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

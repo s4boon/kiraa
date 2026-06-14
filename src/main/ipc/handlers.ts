@@ -1,11 +1,16 @@
 import { is } from '@electron-toolkit/utils'
 import { RoomModel } from '@shared/types'
-import { BrowserWindow, dialog, ipcMain, IpcMainInvokeEvent } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, IpcMainInvokeEvent } from 'electron'
+import fs from 'fs'
 import path from 'path'
 import { Op } from 'sequelize'
 import { Booking, Group, Room } from '../db/models'
+import { dbPath } from '../db/sequelize'
 import type { APIChannels, ChannelName, EventChannelName, EventChannels } from './contract'
 import { searchRooms } from './utils'
+
+const tipestamp = new Date().getTime()
+const BACKUP_PATH = path.join(app.getPath('userData'), `kiraa.backup-${tipestamp}.db`)
 
 type Handler<K extends ChannelName> = (
   event: IpcMainInvokeEvent,
@@ -150,7 +155,7 @@ const handlers: {
     const limit = data.per_page ?? 0
     const offset = data.page ?? 0
     let room: RoomModel | null = null
-    if (data.room?.trim() != '') {
+    if (data.room?.trim() != '' && data.room != '*') {
       room = await Room.findOne({
         where: {
           name: data.room
@@ -205,23 +210,18 @@ const handlers: {
     }
   },
 
-  'db:import': async (event) => {
+  'window:togglefullscreen': async (event) => {
     const win = BrowserWindow.fromWebContents(event.sender)
-    if (!win) return { filepath: null }
-    const result = await dialog.showOpenDialog(win, {
-      title: 'Import database',
-      filters: [{ name: 'SQLite DB', extensions: ['db'] }],
-      properties: ['openFile']
-    })
+    if (!win) return
 
-    if (result.canceled || !result.filePaths.length) return { filepath: null }
-    return { filepath: result.filePaths[0] }
+    win.setFullScreen(!win.fullScreen)
   },
+
   'window:newchild': (event, data) => {
     const child = new BrowserWindow({
       width: 800,
       height: 600,
-      parent: BrowserWindow.getFocusedWindow() ?? undefined,
+      parent: BrowserWindow.fromWebContents(event.sender) ?? undefined,
       modal: true,
       webPreferences: {
         preload: path.join(__dirname, '../preload/index.js'),
@@ -236,6 +236,36 @@ const handlers: {
         hash: data.route
       })
     }
+  },
+
+  'db:import': async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return { filepath: null }
+    const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+      title: 'Import database',
+      filters: [{ name: 'SQLite DB', extensions: ['db'] }],
+      properties: ['openFile']
+    })
+
+    if (canceled || !filePaths.length) return { filepath: null }
+
+    return { filepath: filePaths[0] }
+  },
+
+  'db:export': async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return { filepath: null }
+    const { canceled, filePath } = await dialog.showSaveDialog(win, {
+      title: 'Export Database',
+      defaultPath: BACKUP_PATH,
+      filters: [{ name: 'SQLite DB', extensions: ['db'] }]
+    })
+
+    if (canceled || !filePath) return { filepath: null }
+
+    fs.copyFileSync(dbPath, filePath)
+
+    return { filepath: filePath }
   }
 }
 

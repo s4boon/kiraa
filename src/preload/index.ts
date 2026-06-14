@@ -14,8 +14,9 @@ const ALLOWED_CHANNELS: ChannelName[] = [
   'booking:delete',
   'booking:search',
   'data:list',
-  'db:import',
-  'window:newchild'
+  'db:export',
+  'window:newchild',
+  'window:togglefullscreen'
 ]
 const ALLOWED_EVENTS: EventChannelName[] = ['notification:new', 'cache:invalidate']
 

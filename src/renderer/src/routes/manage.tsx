@@ -1,16 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { queryKeys } from '@shared/query_keys'
-import { GroupModelType } from '@shared/types'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { Suspense, useState } from 'react'
 import { toast } from 'sonner'
 import ErrorBoundary from '../error_boundary'
-
-type Group = {
-  data: GroupModelType
-  rooms: GroupModelType[]
-}
 
 function Page() {
   const groupsQuery = queryOptions({
@@ -56,7 +50,7 @@ function GroupAdd() {
       }}
     >
       <Input type="text" name="groupname" />
-      <Button>Create</Button>
+      <Button disabled={isLoading}>Create</Button>
     </form>
   )
 }
@@ -96,7 +90,7 @@ function RoomAdd({ groups }: { groups: string[] }) {
         ))}
       </select>
       <Input type="text" name="roomname" />
-      <Button>Create</Button>
+      <Button disabled={isLoading}>Create</Button>
     </form>
   )
 }

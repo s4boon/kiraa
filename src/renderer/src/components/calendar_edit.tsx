@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
-import { assignColor, CalendarCell, CalendarGrid, HalfSlotStyle } from './calendar_grid'
-import { dayTimestamp, isInRange, toHalfDate, useCalendar } from './context/calendar_context'
 import { BookingModelType } from '@shared/types'
+import { useMemo } from 'react'
+import { CalendarCell, CalendarGrid, HalfSlotStyle } from './calendar_grid'
+import { dayTimestamp, isInRange, toHalfDate, useCalendar } from './context/calendar_context'
 
 type CalendarEditProps = {
   cells: CalendarCell[]
@@ -25,7 +25,6 @@ export function CalendarEdit({ cells, bookings }: CalendarEditProps) {
   if (calendarState.mode !== 'edit') return null
 
   const { booking, adjusting } = calendarState
-  const BOOKING_COLOR = assignColor(booking.id)
 
   // Other bookings excluding the one being edited
   const otherBookings = bookings.filter((b) => b.id !== booking.id)
@@ -131,11 +130,7 @@ export function CalendarEdit({ cells, bookings }: CalendarEditProps) {
     }
   }
 
-  function handleHalfClick(
-    date: Date,
-    half: 'AM' | 'PM',
-    bookingSlot: BookingModelType | undefined
-  ) {
+  function handleHalfClick(date: Date, half: 'AM' | 'PM') {
     const halfDate = toHalfDate(date, half)
     const isStart = booking.startDate.getTime() === halfDate.getTime()
     const isEnd = booking.endDate.getTime() === halfDate.getTime()

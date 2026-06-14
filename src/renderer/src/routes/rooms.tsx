@@ -3,9 +3,11 @@ import Bookings from '@/components/booking_display'
 import BookingEdit from '@/components/booking_edit_form'
 import Calendar from '@/components/calendar'
 import { isDayInRange, useCalendar } from '@/components/context/calendar_context'
+import { useNavbar } from '@/components/context/navbar_context'
 import Rooms from '@/components/rooms'
 import { queryKeys } from '@shared/query_keys'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useParams } from 'react-router'
 
 type Props = {}
@@ -34,6 +36,10 @@ export default function RoomsPage({}: Props) {
   const { room, bookings } = useSuspenseQuery(roomQuery).data
 
   const { selectedDate, calendarState } = useCalendar()
+  const { setCrumbs } = useNavbar()
+  useEffect(() => {
+    setCrumbs(`الغرفة: ${room.name}`)
+  }, [room])
   return (
     <div className="grid h-full gap-3 grid-cols-16">
       <div className="col-span-3 overflow-y-auto">

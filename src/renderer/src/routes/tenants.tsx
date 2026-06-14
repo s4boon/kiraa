@@ -1,3 +1,4 @@
+import { useNavbar } from '@/components/context/navbar_context'
 import { Invoice, InvoiceProps } from '@/components/print_invoice'
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
@@ -39,6 +40,7 @@ export default function search({}: Props) {
   const [contact, setContact] = useState('')
   const [room, setRoom] = useState('')
   const [page, setPage] = useState(0)
+
   const bookingQuery = queryOptions({
     queryKey: [...queryKeys.booking, tenant, contact, page, PRE_PAGE, room],
     queryFn: () =>
@@ -66,6 +68,11 @@ export default function search({}: Props) {
 
     window.print()
   }, [printBooking])
+
+  const { setCrumbs } = useNavbar()
+  useEffect(() => {
+    setCrumbs('الزبائن')
+  }, [])
 
   return (
     <div className="h-full min-h-0">
@@ -117,6 +124,9 @@ export default function search({}: Props) {
                   <SelectValue placeholder="الغرفة" />
                 </SelectTrigger>
                 <SelectContent dir="rtl" className="max-w-20">
+                  <SelectGroup>
+                    <SelectItem value="*">الكل</SelectItem>
+                  </SelectGroup>
                   {groups.map((group) => {
                     return (
                       <SelectGroup key={group.data.id}>

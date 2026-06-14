@@ -1,5 +1,7 @@
+import { useNavbar } from '@/components/context/navbar_context'
 import { queryKeys } from '@shared/query_keys'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { Navigate } from 'react-router'
 
 export default function RoomsRedirect() {
@@ -11,6 +13,10 @@ export default function RoomsRedirect() {
   const groups = useSuspenseQuery(groupsQuery).data.groups
 
   const firstRoom = groups.at(0)?.rooms.at(0)
+  const { setCrumbs } = useNavbar()
+  useEffect(() => {
+    setCrumbs('تحميل...')
+  }, [])
 
   if (!firstRoom) {
     return <div>لا توجد غرف حاليا</div>
