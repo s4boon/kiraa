@@ -14,10 +14,12 @@ type Props = {
 
 export default function booking_edit_form({ room }: Props) {
   const [isLoading, setIsLoading] = useState(false)
-
   const { calendarState, enterDisplay } = useCalendar()
   if (calendarState.mode != 'edit') return null
   const { booking } = calendarState
+  const [total, setTotal] = useState<number>(booking.total ?? 0)
+  const [paid, setPaid] = useState<number>(booking.paid ?? 0)
+
   async function UpdateBooking(booking: Omit<CreationAttributes<BookingModel>, 'roomId'>) {
     setIsLoading(true)
     await window.ipcAPI
@@ -101,11 +103,30 @@ export default function booking_edit_form({ room }: Props) {
       <FieldSeparator />
       <Field>
         <FieldLabel htmlFor="total">المبلغ الكلي (دج): *</FieldLabel>
-        <Input id="total" name="total" type="number" defaultValue={booking.total ?? 0} required />
+        <Input
+          id="total"
+          name="total"
+          type="number"
+          defaultValue={total}
+          onChange={(e) => {
+            setTotal(Number(e.currentTarget.value))
+          }}
+          required
+        />
       </Field>
       <Field>
         <FieldLabel htmlFor="paid">المبلغ المدفوع (دج): *</FieldLabel>
-        <Input id="paid" name="paid" type="number" defaultValue={booking.paid ?? 0} required />
+        <Input
+          id="paid"
+          name="paid"
+          type="number"
+          defaultValue={paid}
+          max={total}
+          onChange={(e) => {
+            setPaid(Number(e.currentTarget.value))
+          }}
+          required
+        />
       </Field>
       {booking.total && booking.paid && (
         <div className="text-sm">المبلغ المتبقي: {booking.total - booking.paid} دج</div>

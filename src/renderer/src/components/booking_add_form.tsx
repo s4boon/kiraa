@@ -1,3 +1,4 @@
+import { BookingModel } from '@shared/types'
 import { useState } from 'react'
 import { CreationAttributes } from 'sequelize'
 import { toast } from 'sonner'
@@ -6,7 +7,6 @@ import { Button } from './ui/button'
 import { Field, FieldLabel, FieldSeparator } from './ui/field'
 import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
-import { BookingModel } from '@shared/types'
 
 type Props = {
   room: string
@@ -22,10 +22,6 @@ export default function booking_form({ room }: Props) {
     room_name: string
   ) {
     setIsLoading(true)
-    if (total < paid) {
-      toast.error('المبلغ المدفوع لايمكن أن يتعدى المبلغ الكلي')
-      return
-    }
     await window.ipcAPI
       .invoke('booking:create', { booking, room_name })
       .then(() => toast.success('تم الحجز'))
@@ -113,6 +109,7 @@ export default function booking_form({ room }: Props) {
           name="paid"
           type="number"
           value={paid}
+          max={total}
           onChange={(e) => {
             setPaid(Number(e.currentTarget.value))
           }}

@@ -1,4 +1,5 @@
 import { BookingModelType } from '@shared/types'
+import { getHalf } from './context/calendar_context'
 
 export type InvoiceProps = {
   booking: BookingModelType
@@ -63,6 +64,7 @@ export function Invoice({ booking, roomName, businessName = 'إسم المؤسس
                 year: 'numeric',
                 weekday: 'long'
               })}
+              {getHalf(booking.startDate) == 'AM' ? ' صباحا' : ' مساءا'}
             </div>
 
             <div>إلى:</div>
@@ -73,6 +75,7 @@ export function Invoice({ booking, roomName, businessName = 'إسم المؤسس
                 year: 'numeric',
                 weekday: 'long'
               })}
+              {getHalf(booking.endDate) == 'AM' ? ' صباحا' : ' مساءا'}
             </div>
           </div>
         </div>
