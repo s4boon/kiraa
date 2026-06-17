@@ -94,7 +94,7 @@ export function CalendarGrid({
                   'flex-1 h-full',
                   disabled ? 'cursor-default' : 'cursor-pointer',
                   amStyle.className,
-                  amStyle.anchor && 'ring-2 ring-inset ring-teal-500'
+                  amStyle.anchor && 'ring-2 ring-inset ring-green-900'
                 )}
               />
               {/* PM — right half */}
@@ -106,7 +106,7 @@ export function CalendarGrid({
                   'flex-1 h-full',
                   disabled ? 'cursor-default' : 'cursor-pointer',
                   pmStyle.className,
-                  pmStyle.anchor && 'ring-2 ring-inset ring-teal-500'
+                  pmStyle.anchor && 'ring-2 ring-inset ring-green-900'
                 )}
               />
             </div>

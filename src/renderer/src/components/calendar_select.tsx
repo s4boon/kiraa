@@ -1,7 +1,7 @@
+import { BookingModelType } from '@shared/types'
 import { useMemo } from 'react'
 import { CalendarCell, CalendarGrid, HalfSlotStyle } from './calendar_grid'
 import { getHalf, isInRange, isSameDay, toHalfDate, useCalendar } from './context/calendar_context'
-import { BookingModelType } from '@shared/types'
 
 type CalendarSelectProps = {
   cells: CalendarCell[]
@@ -60,7 +60,7 @@ export function CalendarSelect({ cells, bookings }: CalendarSelectProps) {
       className: booking
         ? 'cursor-default'
         : inRange
-          ? 'bg-teal-300 text-black hover:brightness-110'
+          ? 'bg-green-500 hover:brightness-105'
           : 'hover:brightness-110',
       anchor: !!isAnchor
     }

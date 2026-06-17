@@ -7,7 +7,7 @@ export type InvoiceProps = {
   businessName?: string
 }
 
-export function Invoice({ booking, roomName, businessName = 'إسم المؤسسة' }: InvoiceProps) {
+export function Invoice({ booking, roomName, businessName = 'إقامة الأنيس' }: InvoiceProps) {
   const remaining = Math.max(0, (booking.total ?? 0) - (booking.paid ?? 0))
 
   const money = (amount: number) =>

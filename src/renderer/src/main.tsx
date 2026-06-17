@@ -14,7 +14,7 @@ import { queryClient } from './lib/ts_query'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Toaster dir="rtl" />
+      <Toaster dir="rtl" position="bottom-left" />
       <NavbarProvider>
         <CalendarProvider>
           <ErrorBoundary fallback={<ErrorFallback />}>

@@ -1,5 +1,6 @@
 import { BookingModel } from '@shared/types'
 import { useState } from 'react'
+import { NumericFormat } from 'react-number-format'
 import { CreationAttributes } from 'sequelize'
 import { toast } from 'sonner'
 import { getHalf, useCalendar } from './context/calendar_context'
@@ -22,38 +23,39 @@ export default function booking_edit_form({ room }: Props) {
 
   async function UpdateBooking(booking: Omit<CreationAttributes<BookingModel>, 'roomId'>) {
     setIsLoading(true)
-    await window.ipcAPI
-      .invoke('booking:update', { booking })
-      .then(() => {
-        toast.success('تم تعديل الحجز')
-        enterDisplay()
-      })
-      .catch(() => {
-        toast.error('فشل التعديل')
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+    await window.ipcAPI.invoke('booking:update', { booking }).finally(() => {
+      setIsLoading(false)
+    })
   }
   return (
     <form
       className="grid gap-y-1.5"
       onSubmit={async (e) => {
         e.preventDefault()
+
+        if (paid > total) {
+          toast.error('المبلغ المدفوع لا يجب أن يتعدى المبلغ الكلي', { position: 'bottom-left' })
+          return
+        }
+
         const tenant_name = e.currentTarget.tenant_name.value
         const tenant_contact = e.currentTarget.tenant_contact.value
-        const total = Number(e.currentTarget.total.value ?? 0)
-        const paid = Number(e.currentTarget.paid.value ?? 0)
         const notes = e.currentTarget.notes.value ?? ''
-        console.log(tenant_name, tenant_contact, total, paid, notes, booking)
-        await UpdateBooking({
-          ...booking,
-          additionalInfo: notes,
-          paid,
-          total,
-          tenant: tenant_name,
-          contact: tenant_contact
-        })
+        toast.promise(
+          UpdateBooking({
+            ...booking,
+            additionalInfo: notes,
+            paid,
+            total,
+            tenant: tenant_name,
+            contact: tenant_contact
+          }),
+          {
+            loading: 'تحميل...',
+            success: 'تم تعديل الحجز',
+            error: 'فشلت العملية'
+          }
+        )
       }}
     >
       <Field>
@@ -103,29 +105,30 @@ export default function booking_edit_form({ room }: Props) {
       <FieldSeparator />
       <Field>
         <FieldLabel htmlFor="total">المبلغ الكلي (دج): *</FieldLabel>
-        <Input
+        <NumericFormat
+          customInput={Input}
           id="total"
           name="total"
-          type="number"
-          defaultValue={total}
-          onChange={(e) => {
-            setTotal(Number(e.currentTarget.value))
-          }}
+          value={total > 0 ? total : ''}
           required
+          onValueChange={(v) => {
+            setTotal(Number(v.value))
+          }}
+          thousandSeparator
         />
       </Field>
       <Field>
         <FieldLabel htmlFor="paid">المبلغ المدفوع (دج): *</FieldLabel>
-        <Input
+        <NumericFormat
+          customInput={Input}
           id="paid"
           name="paid"
-          type="number"
-          defaultValue={paid}
-          max={total}
-          onChange={(e) => {
-            setPaid(Number(e.currentTarget.value))
-          }}
+          value={paid > 0 ? paid : ''}
           required
+          onValueChange={(v) => {
+            setPaid(Number(v.value))
+          }}
+          thousandSeparator
         />
       </Field>
       {booking.total && booking.paid && (

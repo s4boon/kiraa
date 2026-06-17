@@ -5,13 +5,14 @@ import { createContext, ReactNode, useContext, useState } from 'react'
 
 type DisplayState = { mode: 'display' }
 type SelectState = { mode: 'select'; firstSelection?: Date }
-type EditState = {
-  mode: 'edit'
-  booking: BookingModelType
-  adjusting?: 'start' | 'end'
-}
+type EditState = { mode: 'edit'; booking: BookingModelType; adjusting?: 'start' | 'end' }
 
 export type CalendarState = DisplayState | SelectState | EditState
+
+export function assignColor(id: number): string {
+  const hue = (id * 137.508) % 360
+  return `hsl(${hue}, 70%, 60%)`
+}
 
 // --- Half-day helpers ---
 
@@ -110,8 +111,24 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
     if (calendarState.mode !== 'select') return
     const clicked = toHalfDate(date, half)
 
+    // Both already set, any click — start a fresh selection anchored at the clicked half
+    if (startSelection && endSelection) {
+      setStartSelection(undefined)
+      setEndSelection(undefined)
+      setCalendarState({ mode: 'select', firstSelection: clicked })
+      setHoveredHalf(undefined)
+      return
+    }
+
     if (!calendarState.firstSelection) {
       setCalendarState({ mode: 'select', firstSelection: clicked })
+      return
+    }
+
+    // Anchor already set — clicking the same half again cancels it
+    if (calendarState.firstSelection.getTime() === clicked.getTime()) {
+      setCalendarState({ mode: 'select' })
+      setHoveredHalf(undefined)
       return
     }
 

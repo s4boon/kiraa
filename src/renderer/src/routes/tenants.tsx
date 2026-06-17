@@ -31,6 +31,7 @@ import {
   Search
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 
 type Props = {}
 
@@ -40,6 +41,8 @@ export default function search({}: Props) {
   const [contact, setContact] = useState('')
   const [room, setRoom] = useState('')
   const [page, setPage] = useState(0)
+
+  const navigate = useNavigate()
 
   const bookingQuery = queryOptions({
     queryKey: [...queryKeys.booking, tenant, contact, page, PRE_PAGE, room],
@@ -152,8 +155,17 @@ export default function search({}: Props) {
         </TableHeader>
         <TableBody className="">
           {bookings.map((booking) => {
+            const room_ = rooms.find((r) => r.id == booking.roomId)
             return (
-              <TableRow key={booking.id}>
+              <TableRow
+                key={booking.id}
+                onClick={() => {
+                  if (room_) {
+                    navigate(`/rooms/${room_?.name}?epoch=${booking.startDate.getTime()}`)
+                  }
+                }}
+                className="cursor-pointer"
+              >
                 <TableCell>{booking.tenant}</TableCell>
                 <TableCell className="">{booking.contact}</TableCell>
                 <TableCell className="">
@@ -173,9 +185,9 @@ export default function search({}: Props) {
                     year: 'numeric'
                   })}
                 </TableCell>
-                <TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
                   <Button
-                    onClick={() => {
+                    onClick={(e) => {
                       const roomName = rooms.find((r) => r.id == booking.roomId)?.name ?? ''
                       setPrintBooking({ booking, roomName })
                     }}

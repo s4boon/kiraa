@@ -1,5 +1,6 @@
 import { BookingModel } from '@shared/types'
 import { useState } from 'react'
+import { NumericFormat } from 'react-number-format'
 import { CreationAttributes } from 'sequelize'
 import { toast } from 'sonner'
 import { getHalf, useCalendar } from './context/calendar_context'
@@ -17,6 +18,7 @@ export default function booking_form({ room }: Props) {
   const [paid, setPaid] = useState(0)
   const [total, setTotal] = useState(0)
   const { startSelection, endSelection, enterDisplay } = useCalendar()
+
   async function CreateBooking(
     booking: Omit<CreationAttributes<BookingModel>, 'roomId'>,
     room_name: string
@@ -24,8 +26,6 @@ export default function booking_form({ room }: Props) {
     setIsLoading(true)
     await window.ipcAPI
       .invoke('booking:create', { booking, room_name })
-      .then(() => toast.success('تم الحجز'))
-      .catch(() => toast.error('فشلت العملية'))
       .finally(() => setIsLoading(false))
   }
   return (
@@ -33,23 +33,35 @@ export default function booking_form({ room }: Props) {
       className="grid gap-y-1.5"
       onSubmit={async (e) => {
         e.preventDefault()
-        if (!startSelection || !endSelection) return
+        if (!startSelection || !endSelection) {
+          toast.error('الرجاء تحديد مدة الحجز', { position: 'bottom-left' })
+          return
+        }
+        if (paid > total) {
+          toast.error('المبلغ المدفوع لا يجب أن يتعدى المبلغ الكلي', { position: 'bottom-left' })
+          return
+        }
         const tenant_name = e.currentTarget.tenant_name.value
         const tenant_contact = e.currentTarget.tenant_contact.value
-        const total = Number(e.currentTarget.total.value)
-        const paid = Number(e.currentTarget.paid.value)
         const notes = e.currentTarget.notes.value
-        await CreateBooking(
+        toast.promise(
+          CreateBooking(
+            {
+              startDate: startSelection,
+              endDate: endSelection,
+              tenant: tenant_name,
+              contact: tenant_contact,
+              paid,
+              total,
+              additionalInfo: notes
+            },
+            room
+          ),
           {
-            startDate: startSelection,
-            endDate: endSelection,
-            tenant: tenant_name,
-            contact: tenant_contact,
-            paid,
-            total,
-            additionalInfo: notes
-          },
-          room
+            loading: 'تحميل...',
+            success: 'تم الحجز',
+            error: 'فشلت العملية'
+          }
         )
       }}
     >
@@ -91,29 +103,34 @@ export default function booking_form({ room }: Props) {
       <FieldSeparator />
       <Field>
         <FieldLabel htmlFor="total">المبلغ الكلي (دج): *</FieldLabel>
-        <Input
+
+        <NumericFormat
+          customInput={Input}
+          value={total > 0 ? total : ''}
           id="total"
-          name="total"
-          type="number"
-          value={total}
-          onChange={(e) => {
-            setTotal(Number(e.currentTarget.value))
-          }}
           required
+          onValueChange={(v) => {
+            setTotal(Number(v.value))
+          }}
+          allowNegative={false}
+          // allowLeadingZeros={false}
+          thousandSeparator
         />
       </Field>
       <Field>
         <FieldLabel htmlFor="paid">المبلغ المدفوع (دج): *</FieldLabel>
-        <Input
-          id="paid"
-          name="paid"
-          type="number"
-          value={paid}
+        <NumericFormat
+          customInput={Input}
+          value={paid > 0 ? paid : ''}
           max={total}
-          onChange={(e) => {
-            setPaid(Number(e.currentTarget.value))
-          }}
+          id="paid"
           required
+          onValueChange={(v) => {
+            setPaid(Number(v.value))
+          }}
+          allowNegative={false}
+          allowLeadingZeros={false}
+          thousandSeparator
         />
       </Field>
       {<div className="text-sm">المبلغ المتبقي: {total - paid} دج</div>}
