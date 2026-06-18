@@ -17,16 +17,18 @@ export default function booking_form({ room }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [paid, setPaid] = useState(0)
   const [total, setTotal] = useState(0)
-  const { startSelection, endSelection, enterDisplay } = useCalendar()
+  const { startSelection, endSelection, enterDisplay, setSelectedDate } = useCalendar()
 
   async function CreateBooking(
     booking: Omit<CreationAttributes<BookingModel>, 'roomId'>,
     room_name: string
   ) {
     setIsLoading(true)
-    await window.ipcAPI
-      .invoke('booking:create', { booking, room_name })
-      .finally(() => setIsLoading(false))
+    const b = await window.ipcAPI.invoke('booking:create', { booking, room_name }).finally(() => {
+      setIsLoading(false)
+      enterDisplay()
+    })
+    return b
   }
   return (
     <form
@@ -34,11 +36,11 @@ export default function booking_form({ room }: Props) {
       onSubmit={async (e) => {
         e.preventDefault()
         if (!startSelection || !endSelection) {
-          toast.error('الرجاء تحديد مدة الحجز', { position: 'bottom-left' })
+          toast.error('الرجاء تحديد مدة الحجز')
           return
         }
         if (paid > total) {
-          toast.error('المبلغ المدفوع لا يجب أن يتعدى المبلغ الكلي', { position: 'bottom-left' })
+          toast.error('المبلغ المدفوع لا يجب أن يتعدى المبلغ الكلي')
           return
         }
         const tenant_name = e.currentTarget.tenant_name.value
@@ -59,7 +61,10 @@ export default function booking_form({ room }: Props) {
           ),
           {
             loading: 'تحميل...',
-            success: 'تم الحجز',
+            success: (b) => {
+              setSelectedDate(b.booking.startDate)
+              return 'تم الحجز'
+            },
             error: 'فشلت العملية'
           }
         )
@@ -103,7 +108,6 @@ export default function booking_form({ room }: Props) {
       <FieldSeparator />
       <Field>
         <FieldLabel htmlFor="total">المبلغ الكلي (دج): *</FieldLabel>
-
         <NumericFormat
           customInput={Input}
           value={total > 0 ? total : ''}

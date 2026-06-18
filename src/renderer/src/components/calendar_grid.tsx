@@ -55,7 +55,6 @@ export function CalendarGrid({
       {cells.map((cell) => {
         const amDate = toHalfDate(cell.date, 'AM')
         const pmDate = toHalfDate(cell.date, 'PM')
-
         const amBooking = bookings_.find(
           (b) =>
             b.startDate.getTime() <= amDate.getTime() && amDate.getTime() <= b.endDate.getTime()
@@ -64,7 +63,6 @@ export function CalendarGrid({
           (b) =>
             b.startDate.getTime() <= pmDate.getTime() && pmDate.getTime() <= b.endDate.getTime()
         )
-
         const amStyle = getHalfStyle(cell.date, 'AM', amBooking)
         const pmStyle = getHalfStyle(cell.date, 'PM', pmBooking)
         const disabled = !cell.isCurrentMonth
@@ -77,13 +75,14 @@ export function CalendarGrid({
               !cell.isCurrentMonth && 'opacity-50',
               disabled ? 'bg-muted text-muted-foreground' : 'bg-background',
               isToday(cell.date) && 'border-b-chart-4 border-b-2',
-              selectedDate && isSameDay(cell.date, selectedDate) && 'border-chart-4'
+              selectedDate &&
+                isSameDay(cell.date, selectedDate) &&
+                'border-chart-4 ring-2 ring-chart-4'
             )}
           >
             <span className="absolute top-2 left-2 flex items-center justify-center text-lg font-medium pointer-events-none z-10 select-none">
               {cell.date.getDate()}
             </span>
-
             <div className="flex h-full">
               {/* AM — left half */}
               <div

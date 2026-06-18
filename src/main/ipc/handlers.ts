@@ -134,7 +134,7 @@ const handlers: {
       ...booking,
       roomId: room.get({ plain: true }).id
     })
-    return { booking: b }
+    return { booking: b.get({ plain: true }) }
   },
 
   'booking:update': async (_, data) => {
@@ -143,7 +143,7 @@ const handlers: {
     const b = await Booking.findByPk(booking.id)
     if (!b) throw new Error('could not find the booking or the associated tenant')
     const updated_booking = await b.update({ ...booking })
-    return { booking: updated_booking }
+    return { booking: updated_booking.get({ plain: true }) }
   },
 
   'booking:delete': async (_, data) => {

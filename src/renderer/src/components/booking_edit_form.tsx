@@ -25,6 +25,7 @@ export default function booking_edit_form({ room }: Props) {
     setIsLoading(true)
     await window.ipcAPI.invoke('booking:update', { booking }).finally(() => {
       setIsLoading(false)
+      enterDisplay()
     })
   }
   return (

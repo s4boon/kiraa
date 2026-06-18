@@ -187,7 +187,7 @@ export default function search({}: Props) {
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <Button
-                    onClick={(e) => {
+                    onClick={() => {
                       const roomName = rooms.find((r) => r.id == booking.roomId)?.name ?? ''
                       setPrintBooking({ booking, roomName })
                     }}

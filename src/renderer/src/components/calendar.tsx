@@ -1,5 +1,13 @@
 import { BookingModelType, RoomModelType } from '@shared/types'
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Plus, X } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  CircleDot,
+  Plus,
+  X
+} from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { CalendarDisplay } from './calendar_display'
 import { CalendarEdit } from './calendar_edit'
@@ -85,6 +93,14 @@ export default function Calendar({ room, bookings }: CalendarProps) {
             className="p-1 border rounded"
           >
             <ChevronsRight className="size-4" />
+          </Button>
+          <Button
+            variant={'ghost'}
+            size={'icon'}
+            onClick={() => setCurrent(new Date())}
+            className="p-1 border rounded"
+          >
+            <CircleDot className="size-4" />
           </Button>
         </div>
 
